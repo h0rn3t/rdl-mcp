@@ -49,8 +49,8 @@ func TestSDKCatalogMatchesContract(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ListTools() error = %v, want nil", err)
 	}
-	if len(listed.Tools) != 15 {
-		t.Fatalf("ListTools() count = %d, want 15", len(listed.Tools))
+	if len(listed.Tools) != 18 {
+		t.Fatalf("ListTools() count = %d, want 18", len(listed.Tools))
 	}
 	want := make(map[string]any, len(baseline.Handshake[1].Result.Tools))
 	for _, tool := range baseline.Handshake[1].Result.Tools {

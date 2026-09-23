@@ -8,37 +8,79 @@ import (
 	"strings"
 )
 
-// UpdateColumnHeader changes the first matching Value element.
-func UpdateColumnHeader(path, oldHeader, newHeader string) (map[string]any, error) {
-	doc, err := LoadXMLFile(path)
-	if err != nil {
-		return nil, err
-	}
-	for _, value := range findAll(doc.Root, "Value", doc.Root.URI) {
-		if textString(value) != oldHeader {
-			continue
-		}
-		if err := value.SetText(newHeader); err != nil {
-			return nil, err
-		}
-		if err := doc.SaveXMLFile(path); err != nil {
-			return nil, err
-		}
-		return map[string]any{"success": true, "message": fmt.Sprintf("Updated header from %q to %q", oldHeader, newHeader)}, nil
-	}
-	return map[string]any{"success": false, "message": fmt.Sprintf("Header %q not found", oldHeader)}, nil
-}
-
-// UpdateColumnWidth changes a Tablix column width.
-func UpdateColumnWidth(path string, index int, width string) (map[string]any, error) {
+// UpdateColumnHeader changes a matching header in the selected Tablix.
+func UpdateColumnHeader(path, oldHeader, newHeader, tablixName string) (map[string]any, error) {
 	doc, err := LoadXMLFile(path)
 	if err != nil {
 		return nil, err
 	}
 	ns := doc.Root.URI
-	tablix := findFirst(doc.Root, "Tablix", ns)
+	tablix, names := selectTablix(doc.Root, ns, tablixName)
 	if tablix == nil {
-		return map[string]any{"success": false, "message": "No Tablix found"}, nil
+		return columnSelectionFailure(tablixName, names), nil
+	}
+	var target *Element
+	for _, row := range tablixRows(tablix, ns) {
+		cells := tablixCells(row, ns)
+		if detectRowType(cells, ns) != "header" {
+			continue
+		}
+		for _, cell := range cells {
+			for _, textbox := range findAll(cell, "Textbox", ns) {
+				for _, value := range findAll(textbox, "Value", ns) {
+					if textString(value) == oldHeader {
+						target = value
+						break
+					}
+				}
+				if target != nil {
+					break
+				}
+			}
+			if target != nil {
+				break
+			}
+		}
+		if target != nil {
+			break
+		}
+	}
+	if target == nil {
+		return map[string]any{"success": false, "message": fmt.Sprintf("Header %q not found", oldHeader)}, nil
+	}
+	if err := target.SetText(newHeader); err != nil {
+		return nil, err
+	}
+	if err := doc.SaveXMLFile(path); err != nil {
+		return nil, err
+	}
+	return map[string]any{"success": true, "message": fmt.Sprintf("Updated header from %q to %q", oldHeader, newHeader)}, nil
+}
+
+func columnSelectionFailure(tablixName string, names []string) map[string]any {
+	message := "No Tablix found in report"
+	if len(names) > 1 && tablixName == "" {
+		message = "Multiple Tablix found; specify tablix_name"
+	} else if tablixName != "" && len(names) > 0 {
+		message = fmt.Sprintf("Tablix %q not found", tablixName)
+	}
+	result := map[string]any{"success": false, "message": message}
+	if len(names) > 0 {
+		result["tablixes"] = names
+	}
+	return result
+}
+
+// UpdateColumnWidth changes a Tablix column width.
+func UpdateColumnWidth(path string, index int, width, tablixName string) (map[string]any, error) {
+	doc, err := LoadXMLFile(path)
+	if err != nil {
+		return nil, err
+	}
+	ns := doc.Root.URI
+	tablix, names := selectTablix(doc.Root, ns, tablixName)
+	if tablix == nil {
+		return columnSelectionFailure(tablixName, names), nil
 	}
 	columns := tablixColumns(tablix, ns)
 	if index < 0 || index >= len(columns) {
@@ -59,15 +101,15 @@ func UpdateColumnWidth(path string, index int, width string) (map[string]any, er
 }
 
 // UpdateColumnFormat changes the format of a data row TextRun.
-func UpdateColumnFormat(path string, index int, format string) (map[string]any, error) {
+func UpdateColumnFormat(path string, index int, format, tablixName string) (map[string]any, error) {
 	doc, err := LoadXMLFile(path)
 	if err != nil {
 		return nil, err
 	}
 	ns := doc.Root.URI
-	tablix := findFirst(doc.Root, "Tablix", ns)
+	tablix, names := selectTablix(doc.Root, ns, tablixName)
 	if tablix == nil {
-		return map[string]any{"success": false, "message": "No Tablix found in report"}, nil
+		return columnSelectionFailure(tablixName, names), nil
 	}
 	for _, row := range tablixRows(tablix, ns) {
 		cells := tablixCells(row, ns)
@@ -112,15 +154,15 @@ func UpdateColumnFormat(path string, index int, format string) (map[string]any, 
 }
 
 // AddColumn inserts a Tablix column and matching row cells.
-func AddColumn(path string, index int, header, binding string, width, format, footer *string) (map[string]any, error) {
+func AddColumn(path string, index int, header, binding string, width, format, footer *string, tablixName string) (map[string]any, error) {
 	doc, err := LoadXMLFile(path)
 	if err != nil {
 		return nil, err
 	}
 	ns := doc.Root.URI
-	tablix := findFirst(doc.Root, "Tablix", ns)
+	tablix, names := selectTablix(doc.Root, ns, tablixName)
 	if tablix == nil {
-		return map[string]any{"success": false, "message": "No Tablix found in report"}, nil
+		return columnSelectionFailure(tablixName, names), nil
 	}
 	container := tablixColumnContainer(tablix, ns)
 	if container == nil {
@@ -164,15 +206,15 @@ func AddColumn(path string, index int, header, binding string, width, format, fo
 }
 
 // RemoveColumn deletes a Tablix column and optionally adjusts the page width.
-func RemoveColumn(path string, index int, autoAdjust bool) (map[string]any, error) {
+func RemoveColumn(path string, index int, autoAdjust bool, tablixName string) (map[string]any, error) {
 	doc, err := LoadXMLFile(path)
 	if err != nil {
 		return nil, err
 	}
 	ns := doc.Root.URI
-	tablix := findFirst(doc.Root, "Tablix", ns)
+	tablix, names := selectTablix(doc.Root, ns, tablixName)
 	if tablix == nil {
-		return map[string]any{"success": false, "message": "No Tablix found in report"}, nil
+		return columnSelectionFailure(tablixName, names), nil
 	}
 	container := tablixColumnContainer(tablix, ns)
 	if container == nil {

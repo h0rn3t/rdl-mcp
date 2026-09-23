@@ -2,6 +2,7 @@ package rdl
 
 import (
 	"fmt"
+	"maps"
 	"os"
 	"slices"
 	"strings"
@@ -9,20 +10,28 @@ import (
 
 // Validate returns the contract-compatible RDL validity result.
 func Validate(path string) map[string]any {
+	scope := map[string]any{
+		"validation_scope": "static_rdl",
+		"not_checked":      []string{"sql_execution", "ssrs_render"},
+	}
+	withScope := func(result map[string]any) map[string]any {
+		maps.Copy(result, scope)
+		return result
+	}
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return map[string]any{"valid": false, "issues": []string{"Error: " + err.Error()}}
+		return withScope(map[string]any{"valid": false, "issues": []string{"Error: " + err.Error()}})
 	}
 	doc, err := ParseXML(data)
 	if err != nil {
-		return map[string]any{"valid": false, "issues": []string{"XML Parse Error: " + err.Error()}}
+		return withScope(map[string]any{"valid": false, "issues": []string{"XML Parse Error: " + err.Error()}})
 	}
 	ns := doc.Root.URI
 	issues := make([]string, 0)
 	warnings := make([]string, 0)
 	datasets := findAll(doc.Root, "DataSet", ns)
 	if len(datasets) == 0 {
-		return map[string]any{"valid": false, "issues": []string{"No datasets found"}}
+		return withScope(map[string]any{"valid": false, "issues": []string{"No datasets found"}})
 	}
 	datasetFields := make(map[string]map[string]struct{}, len(datasets))
 	for _, dataset := range datasets {
@@ -42,7 +51,11 @@ func Validate(path string) map[string]any {
 	if len(tablixes) == 0 {
 		issues = append(issues, "No Tablix (table) found")
 	}
+	withinTablix := make(map[*Element]struct{})
 	for _, tablix := range tablixes {
+		for _, textbox := range findAll(tablix, "Textbox", ns) {
+			withinTablix[textbox] = struct{}{}
+		}
 		tablixName := fmt.Sprint(attrOr(tablix, "Name", "Unknown"))
 		datasetName := textString(findChild(tablix, "DataSetName", ns))
 		if datasetName == "" {
@@ -145,6 +158,51 @@ func Validate(path string) map[string]any {
 			issues = append(issues, fmt.Sprintf("Tablix %q: Field %q not found in dataset %q (referenced in %s). Available fields: %s%s", tablixName, ref.field, ref.dataset, ref.location, strings.Join(available[:min(10, len(available))], ", "), suffix))
 		}
 	}
+	for _, textbox := range findAll(doc.Root, "Textbox", ns) {
+		if _, checked := withinTablix[textbox]; checked {
+			continue
+		}
+		textboxName, _ := attrValue(textbox, "Name").(string)
+		defaultDataset := ""
+		if len(datasetFields) == 1 {
+			for name := range datasetFields {
+				defaultDataset = name
+			}
+		}
+		for _, run := range textboxValues(textbox, ns) {
+			expression := textString(run.value)
+			if !strings.HasPrefix(strings.TrimSpace(expression), "=") {
+				continue
+			}
+			fields := ExtractFieldsWithContext(expression, defaultDataset)
+			if len(fields) == 0 {
+				if strings.Contains(expression, "Fields!") {
+					warnings = append(warnings, fmt.Sprintf("Textbox %q has an unsupported field expression", textboxName))
+				}
+				continue
+			}
+			unknownScope := false
+			for _, datasetName := range slices.Sorted(maps.Keys(fields)) {
+				if datasetName == "" {
+					unknownScope = true
+					continue
+				}
+				available, known := datasetFields[datasetName]
+				for _, field := range fields[datasetName] {
+					if !known {
+						issues = append(issues, fmt.Sprintf("Textbox %q: Expression references unknown dataset %q (field %q)", textboxName, datasetName, field))
+						continue
+					}
+					if _, exists := available[field]; !exists {
+						issues = append(issues, fmt.Sprintf("Textbox %q: Field %q not found in dataset %q (referenced in expression)", textboxName, field, datasetName))
+					}
+				}
+			}
+			if unknownScope {
+				warnings = append(warnings, fmt.Sprintf("Textbox %q has field references with unknown dataset context", textboxName))
+			}
+		}
+	}
 	result := map[string]any{"valid": true, "message": "RDL structure is valid"}
 	if len(issues) > 0 {
 		result = map[string]any{"valid": false, "issues": issues}
@@ -152,7 +210,7 @@ func Validate(path string) map[string]any {
 	if len(warnings) > 0 {
 		result["warnings"] = warnings
 	}
-	return result
+	return withScope(result)
 }
 
 func parentOf(root, target *Element) *Element {

@@ -1,3 +1,4 @@
+// The rdl-mcp command runs the report tools over MCP stdio.
 package main
 
 import (

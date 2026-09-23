@@ -35,26 +35,30 @@ func TestColumnToolsMatchStdioContract(t *testing.T) {
 		name string
 		call func(string) (map[string]any, error)
 	}{
-		{"update_column_header", func(path string) (map[string]any, error) { return UpdateColumnHeader(path, "Name", "Full Name") }},
-		{"update_column_header_missing", func(path string) (map[string]any, error) { return UpdateColumnHeader(path, "Missing", "New") }},
-		{"update_column_width", func(path string) (map[string]any, error) { return UpdateColumnWidth(path, 0, "1.5in") }},
-		{"update_column_width_bad_index", func(path string) (map[string]any, error) { return UpdateColumnWidth(path, 99, "1.5in") }},
-		{"update_column_format", func(path string) (map[string]any, error) { return UpdateColumnFormat(path, 2, "C2") }},
-		{"update_column_format_bad_index", func(path string) (map[string]any, error) { return UpdateColumnFormat(path, 99, "C2") }},
-		{"update_column_format_negative", func(path string) (map[string]any, error) { return UpdateColumnFormat(path, -1, "C2") }},
-		{"add_column", func(path string) (map[string]any, error) { return AddColumn(path, 1, "New", "Name", nil, nil, nil) }},
+		{"update_column_header", func(path string) (map[string]any, error) { return UpdateColumnHeader(path, "Name", "Full Name", "") }},
+		{"update_column_header_missing", func(path string) (map[string]any, error) { return UpdateColumnHeader(path, "Missing", "New", "") }},
+		{"update_column_width", func(path string) (map[string]any, error) { return UpdateColumnWidth(path, 0, "1.5in", "") }},
+		{"update_column_width_bad_index", func(path string) (map[string]any, error) { return UpdateColumnWidth(path, 99, "1.5in", "") }},
+		{"update_column_format", func(path string) (map[string]any, error) { return UpdateColumnFormat(path, 2, "C2", "") }},
+		{"update_column_format_bad_index", func(path string) (map[string]any, error) { return UpdateColumnFormat(path, 99, "C2", "") }},
+		{"update_column_format_negative", func(path string) (map[string]any, error) { return UpdateColumnFormat(path, -1, "C2", "") }},
+		{"add_column", func(path string) (map[string]any, error) { return AddColumn(path, 1, "New", "Name", nil, nil, nil, "") }},
 		{"add_column_custom", func(path string) (map[string]any, error) {
-			return AddColumn(path, 1, "New", "Name", new("2cm"), new("C2"), nil)
+			return AddColumn(path, 1, "New", "Name", new("2cm"), new("C2"), nil, "")
 		}},
 		{"add_column_footer", func(path string) (map[string]any, error) {
-			return AddColumn(path, 1, "New", "Name", nil, nil, new("=Sum(Fields!Amount.Value)"))
+			return AddColumn(path, 1, "New", "Name", nil, nil, new("=Sum(Fields!Amount.Value)"), "")
 		}},
-		{"add_column_end", func(path string) (map[string]any, error) { return AddColumn(path, -1, "Last", "Name", nil, nil, nil) }},
-		{"add_column_bad_index", func(path string) (map[string]any, error) { return AddColumn(path, 99, "New", "Name", nil, nil, nil) }},
-		{"remove_column", func(path string) (map[string]any, error) { return RemoveColumn(path, 1, true) }},
-		{"remove_column_no_adjust", func(path string) (map[string]any, error) { return RemoveColumn(path, 1, false) }},
-		{"remove_column_bad_index", func(path string) (map[string]any, error) { return RemoveColumn(path, 99, true) }},
-		{"remove_column_negative", func(path string) (map[string]any, error) { return RemoveColumn(path, -1, true) }},
+		{"add_column_end", func(path string) (map[string]any, error) {
+			return AddColumn(path, -1, "Last", "Name", nil, nil, nil, "")
+		}},
+		{"add_column_bad_index", func(path string) (map[string]any, error) {
+			return AddColumn(path, 99, "New", "Name", nil, nil, nil, "")
+		}},
+		{"remove_column", func(path string) (map[string]any, error) { return RemoveColumn(path, 1, true, "") }},
+		{"remove_column_no_adjust", func(path string) (map[string]any, error) { return RemoveColumn(path, 1, false, "") }},
+		{"remove_column_bad_index", func(path string) (map[string]any, error) { return RemoveColumn(path, 99, true, "") }},
+		{"remove_column_negative", func(path string) (map[string]any, error) { return RemoveColumn(path, -1, true, "") }},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

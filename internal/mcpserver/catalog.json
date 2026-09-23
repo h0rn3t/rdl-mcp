@@ -65,6 +65,10 @@
         "filepath": {
           "type": "string",
           "description": "Path to the RDL file"
+        },
+        "tablix_name": {
+          "type": "string",
+          "description": "Name of the Tablix to inspect when the report has multiple tables"
         }
       },
       "required": [
@@ -102,6 +106,10 @@
         },
         "new_header": {
           "type": "string"
+        },
+        "tablix_name": {
+          "type": "string",
+          "description": "Name of the Tablix to update when the report has multiple tables"
         }
       },
       "required": [
@@ -125,6 +133,10 @@
         },
         "new_width": {
           "type": "string"
+        },
+        "tablix_name": {
+          "type": "string",
+          "description": "Name of the Tablix to update when the report has multiple tables"
         }
       },
       "required": [
@@ -148,6 +160,10 @@
         },
         "format_string": {
           "type": "string"
+        },
+        "tablix_name": {
+          "type": "string",
+          "description": "Name of the Tablix to update when the report has multiple tables"
         }
       },
       "required": [
@@ -184,6 +200,10 @@
         },
         "footer_expression": {
           "type": "string"
+        },
+        "tablix_name": {
+          "type": "string",
+          "description": "Name of the Tablix to update when the report has multiple tables"
         }
       },
       "required": [
@@ -210,11 +230,105 @@
           "type": "boolean",
           "default": true,
           "description": "If true, shrink page width to fit remaining columns plus margins"
+        },
+        "tablix_name": {
+          "type": "string",
+          "description": "Name of the Tablix to update when the report has multiple tables"
         }
       },
       "required": [
         "filepath",
         "column_index"
+      ]
+    }
+  },
+  {
+    "name": "get_rdl_textboxes",
+    "description": "Get report Textboxes with values, locations, geometry, and core styles",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string",
+          "description": "Path to the RDL file"
+        }
+      },
+      "required": [
+        "filepath"
+      ]
+    }
+  },
+  {
+    "name": "compare_rdl_reports",
+    "description": "Compare semantic report sections across RDL files, using the first file as baseline",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepaths": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "filepaths"
+      ]
+    }
+  },
+  {
+    "name": "patch_rdl_textboxes",
+    "description": "Preview or apply guarded static Textbox text changes across explicit RDL files",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepaths": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "patches": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "textbox_name": {
+                "type": "string"
+              },
+              "expected_value": {
+                "type": "string"
+              },
+              "new_value": {
+                "type": "string"
+              },
+              "paragraph_index": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "text_run_index": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "textbox_name",
+              "expected_value",
+              "new_value"
+            ]
+          }
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": [
+        "filepaths",
+        "patches"
       ]
     }
   },

@@ -15,16 +15,21 @@ RDL MCP дає Claude, GitHub Copilot та іншим MCP-клієнтам ін�
 - `describe_rdl_report` — огляд структури звіту.
 - `get_rdl_datasets` — датасети, поля та збережені процедури; підтримуються обмеження й фільтрація полів.
 - `get_rdl_parameters` — параметри звіту.
-- `get_rdl_columns` — заголовки, ширини та прив'язки колонок.
-- `validate_rdl` — перевірка XML, структури звіту та посилань на поля.
+- `get_rdl_columns` — заголовки, ширини та прив'язки колонок; приймає `tablix_name`, якщо звіт містить кілька таблиць.
+- `get_rdl_textboxes` — значення Textbox, тип тексту або виразу, розташування, доступну геометрію й основні стилі.
+- `compare_rdl_reports` — семантичні відмінності між RDL за Textbox, датасетами, параметрами, Tablix і колонками; перший файл є базовим.
+- `validate_rdl` — статична перевірка XML, структури та посилань на поля. Перевірка не запускає SQL-процедури й не рендерить звіт у SSRS.
 
 **Редагування звітів:**
 
 - `update_column_header`, `update_column_width`, `update_column_format` — зміна колонок.
 - `add_column`, `remove_column` — додавання й вилучення колонок Tablix.
+- `patch_rdl_textboxes` — попередній перегляд або пакетна зміна статичних TextRun у явно вказаних файлах RDL.
 - `update_stored_procedure` — зміна збереженої процедури датасету.
 - `add_dataset_field`, `remove_dataset_field` — керування полями датасету.
 - `add_parameter`, `update_parameter` — додавання й оновлення параметрів.
+
+Колонкові інструменти приймають необов'язковий `tablix_name`. Якщо звіт має одну таблицю, його можна не вказувати; за кількох таблиць редагування без імені відхиляється з переліком кандидатів.
 
 ## Встановлення
 
@@ -130,6 +135,9 @@ go tool rdl-mcp
 ## Приклади запитів
 
 - «Які датасети використовує цей звіт?»
+- «Покажи значення, розташування та оформлення Textbox у звіті».
+- «Порівняй RDL за місяць, квартал і накопичений період».
+- «Заміни заголовок Title у цих трьох RDL з очікуваного старого тексту на новий; спершу покажи preview».
 - «Зміни ширину колонки Account Number на 2 дюйми».
 - «Відформатуй Amount як валюту з двома десятковими знаками».
 - «Додай колонку Amount із сумою у підсумковому рядку».
@@ -141,7 +149,7 @@ go tool rdl-mcp
 ## Довідник інструментів
 
 <details>
-<summary>Переглянути аргументи 15 інструментів</summary>
+<summary>Переглянути аргументи 18 інструментів</summary>
 
 ### Читання
 
@@ -150,17 +158,20 @@ go tool rdl-mcp
   - `field_limit`: `0` — лише кількість полів (типово), `-1` — усі поля, `N` — не більше `N` полів.
   - `field_pattern`: необов'язковий регулярний вираз для назв полів.
 - `get_rdl_parameters(filepath)` — параметри.
-- `get_rdl_columns(filepath)` — колонки Tablix.
-- `validate_rdl(filepath)` — перевірка звіту.
+- `get_rdl_columns(filepath, tablix_name?)` — колонки вибраного Tablix. Якщо таблиця одна, `tablix_name` необов'язковий.
+- `get_rdl_textboxes(filepath)` — Textbox із розташуванням, доступними координатами, стилем і значеннями TextRun.
+- `compare_rdl_reports(filepaths)` — порівняння двох або більше звітів; перший шлях є базовим.
+- `validate_rdl(filepath)` — статична перевірка звіту, без запуску SQL і SSRS render.
 
 ### Редагування
 
-- `update_column_header(filepath, old_header, new_header)` — змінити текст заголовка.
-- `update_column_width(filepath, column_index, new_width)` — змінити ширину, наприклад `2.5in`.
-- `update_column_format(filepath, column_index, format_string)` — змінити формат, наприклад `#,0.00`, `dd/MM/yyyy` або `C2`.
-- `add_column(filepath, column_index, header_text, field_binding, width?, format_string?, footer_expression?)` — додати колонку.
+- `update_column_header(filepath, old_header, new_header, tablix_name?)` — змінити текст заголовка.
+- `update_column_width(filepath, column_index, new_width, tablix_name?)` — змінити ширину, наприклад `2.5in`.
+- `update_column_format(filepath, column_index, format_string, tablix_name?)` — змінити формат, наприклад `#,0.00`, `dd/MM/yyyy` або `C2`.
+- `add_column(filepath, column_index, header_text, field_binding, width?, format_string?, footer_expression?, tablix_name?)` — додати колонку.
   - `footer_expression` — необов'язковий вираз підсумкового рядка, наприклад `=Sum(Fields!Amount.Value)`, `=Count(Fields!ID.Value)` або `Total:`.
-- `remove_column(filepath, column_index)` — вилучити колонку.
+- `remove_column(filepath, column_index, tablix_name?)` — вилучити колонку.
+- `patch_rdl_textboxes(filepaths, patches, dry_run?)` — змінити статичний текст у кількох явно вказаних RDL. Кожен patch задає `textbox_name`, `expected_value` і `new_value`; для Textbox із кількома фрагментами також потрібні `paragraph_index` і `text_run_index`. `dry_run` типово дорівнює `true`; перед записом сервер перевіряє всі цілі. Будь-який конфлікт скасовує пакет до запису; файлову помилку під час збереження результат показує через `failed_file`, `partial` і `written` для кожного шляху.
 - `update_stored_procedure(filepath, dataset_name, new_sproc)` — змінити процедуру датасету.
 - `add_dataset_field(filepath, dataset_name, field_name, data_field, type_name)` — додати поле.
 - `remove_dataset_field(filepath, dataset_name, field_name)` — вилучити поле.
@@ -168,6 +179,8 @@ go tool rdl-mcp
 - `update_parameter(filepath, name, prompt?, default_value?)` — оновити параметр.
 
 Інструменти редагування повертають результат операції; помилки та бізнес-відмови містять пояснення.
+
+Для багатотабличного звіту передавайте `tablix_name` до інструментів читання й редагування колонок. `validate_rdl` повертає `validation_scope: static_rdl` та `not_checked` для запуску SQL і SSRS render. Вирази з невизначеним набором даних подаються як попередження.
 
 </details>
 

@@ -1,3 +1,4 @@
+// Package mcpserver exposes RDL operations through the Model Context Protocol.
 package mcpserver
 
 import (
@@ -22,28 +23,32 @@ type toolDefinition struct {
 }
 
 type toolArgs struct {
-	Filepath            string  `json:"filepath"`
-	FieldLimit          int     `json:"field_limit"`
-	FieldPattern        *string `json:"field_pattern"`
-	OldHeader           string  `json:"old_header"`
-	NewHeader           string  `json:"new_header"`
-	ColumnIndex         int     `json:"column_index"`
-	NewWidth            string  `json:"new_width"`
-	FormatString        *string `json:"format_string"`
-	HeaderText          string  `json:"header_text"`
-	FieldBinding        string  `json:"field_binding"`
-	Width               *string `json:"width"`
-	FooterExpression    *string `json:"footer_expression"`
-	AutoAdjustPageWidth *bool   `json:"auto_adjust_page_width"`
-	DatasetName         string  `json:"dataset_name"`
-	NewSproc            string  `json:"new_sproc"`
-	FieldName           string  `json:"field_name"`
-	DataField           string  `json:"data_field"`
-	TypeName            string  `json:"type_name"`
-	Name                string  `json:"name"`
-	DataType            string  `json:"data_type"`
-	Prompt              *string `json:"prompt"`
-	DefaultValue        *string `json:"default_value"`
+	Filepath            string             `json:"filepath"`
+	Filepaths           []string           `json:"filepaths"`
+	Patches             []rdl.TextboxPatch `json:"patches"`
+	DryRun              *bool              `json:"dry_run"`
+	FieldLimit          int                `json:"field_limit"`
+	FieldPattern        *string            `json:"field_pattern"`
+	TablixName          string             `json:"tablix_name"`
+	OldHeader           string             `json:"old_header"`
+	NewHeader           string             `json:"new_header"`
+	ColumnIndex         int                `json:"column_index"`
+	NewWidth            string             `json:"new_width"`
+	FormatString        *string            `json:"format_string"`
+	HeaderText          string             `json:"header_text"`
+	FieldBinding        string             `json:"field_binding"`
+	Width               *string            `json:"width"`
+	FooterExpression    *string            `json:"footer_expression"`
+	AutoAdjustPageWidth *bool              `json:"auto_adjust_page_width"`
+	DatasetName         string             `json:"dataset_name"`
+	NewSproc            string             `json:"new_sproc"`
+	FieldName           string             `json:"field_name"`
+	DataField           string             `json:"data_field"`
+	TypeName            string             `json:"type_name"`
+	Name                string             `json:"name"`
+	DataType            string             `json:"data_type"`
+	Prompt              *string            `json:"prompt"`
+	DefaultValue        *string            `json:"default_value"`
 }
 
 // New registers the contract-compatible catalog with the official MCP SDK.
@@ -92,27 +97,37 @@ func runTool(name string, args toolArgs) (map[string]any, error) {
 		return rdl.Datasets(args.Filepath, args.FieldLimit, pattern)
 	case "get_rdl_parameters":
 		return rdl.Parameters(args.Filepath)
+	case "get_rdl_textboxes":
+		return rdl.Textboxes(args.Filepath)
+	case "compare_rdl_reports":
+		return rdl.CompareReports(args.Filepaths)
+	case "patch_rdl_textboxes":
+		dryRun := true
+		if args.DryRun != nil {
+			dryRun = *args.DryRun
+		}
+		return rdl.PatchTextboxes(args.Filepaths, args.Patches, dryRun)
 	case "get_rdl_columns":
-		return rdl.Columns(args.Filepath)
+		return rdl.Columns(args.Filepath, args.TablixName)
 	case "validate_rdl":
 		return rdl.Validate(args.Filepath), nil
 	case "update_column_header":
-		return rdl.UpdateColumnHeader(args.Filepath, args.OldHeader, args.NewHeader)
+		return rdl.UpdateColumnHeader(args.Filepath, args.OldHeader, args.NewHeader, args.TablixName)
 	case "update_column_width":
-		return rdl.UpdateColumnWidth(args.Filepath, args.ColumnIndex, args.NewWidth)
+		return rdl.UpdateColumnWidth(args.Filepath, args.ColumnIndex, args.NewWidth, args.TablixName)
 	case "update_column_format":
 		if args.FormatString == nil {
 			return nil, errors.New("format_string is required")
 		}
-		return rdl.UpdateColumnFormat(args.Filepath, args.ColumnIndex, *args.FormatString)
+		return rdl.UpdateColumnFormat(args.Filepath, args.ColumnIndex, *args.FormatString, args.TablixName)
 	case "add_column":
-		return rdl.AddColumn(args.Filepath, args.ColumnIndex, args.HeaderText, args.FieldBinding, args.Width, args.FormatString, args.FooterExpression)
+		return rdl.AddColumn(args.Filepath, args.ColumnIndex, args.HeaderText, args.FieldBinding, args.Width, args.FormatString, args.FooterExpression, args.TablixName)
 	case "remove_column":
 		autoAdjust := true
 		if args.AutoAdjustPageWidth != nil {
 			autoAdjust = *args.AutoAdjustPageWidth
 		}
-		return rdl.RemoveColumn(args.Filepath, args.ColumnIndex, autoAdjust)
+		return rdl.RemoveColumn(args.Filepath, args.ColumnIndex, autoAdjust, args.TablixName)
 	case "update_stored_procedure":
 		return rdl.UpdateStoredProcedure(args.Filepath, args.DatasetName, args.NewSproc)
 	case "add_dataset_field":

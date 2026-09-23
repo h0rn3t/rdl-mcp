@@ -69,6 +69,34 @@ func TestXMLFilePointEdit(t *testing.T) {
 	}
 }
 
+func TestXMLFilePointEditPreservesUTF8BOM(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "report.rdl")
+	data := append([]byte{0xef, 0xbb, 0xbf}, []byte(namespaceFixture)...)
+	if err := os.WriteFile(path, data, 0o640); err != nil {
+		t.Fatalf("WriteFile(%q) error = %v, want nil", path, err)
+	}
+	doc, err := LoadXMLFile(path)
+	if err != nil {
+		t.Fatalf("LoadXMLFile(%q) error = %v, want nil", path, err)
+	}
+	if err := doc.Root.Child("Title").SetText("Changed"); err != nil {
+		t.Fatalf("Title.SetText() error = %v, want nil", err)
+	}
+	if err := doc.SaveXMLFile(path); err != nil {
+		t.Fatalf("SaveXMLFile(%q) error = %v, want nil", path, err)
+	}
+	got, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile(%q) error = %v, want nil", path, err)
+	}
+	if !bytes.HasPrefix(got, []byte{0xef, 0xbb, 0xbf}) {
+		t.Errorf("SaveXMLFile(%q) missing UTF-8 BOM", path)
+	}
+	if !bytes.Contains(got, []byte("<Title>Changed</Title>")) {
+		t.Errorf("SaveXMLFile(%q) = %s, want edited title", path, got)
+	}
+}
+
 func TestXMLRejectsMalformedInput(t *testing.T) {
 	for _, input := range []string{"<Report><Title></Report>", `<Report xmlns:x="urn:x"><x:Title></Title></Report>`, ""} {
 		if _, err := ParseXML([]byte(input)); err == nil {

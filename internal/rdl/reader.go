@@ -30,12 +30,14 @@ func Describe(path string) (map[string]any, error) {
 		datasets = append(datasets, info)
 	}
 	columns := 0
-	if tablix := findFirst(doc.Root, "Tablix", ns); tablix != nil {
-		columns = len(findAll(tablix, "TablixColumn", ns))
+	tablixes := tablixSummaries(doc.Root, ns)
+	if len(tablixes) > 0 {
+		columns = tablixes[0]["column_count"].(int)
 	}
 	return map[string]any{
 		"report_summary": map[string]any{"datasets": len(datasets), "parameters": len(findAll(doc.Root, "ReportParameter", ns)), "table_columns": columns},
 		"datasets":       datasets,
+		"tablixes":       tablixes,
 		"filepath":       path,
 	}, nil
 }
@@ -209,16 +211,59 @@ func Parameters(path string) (map[string]any, error) {
 }
 
 // Columns returns contract-compatible Tablix column details.
-func Columns(path string) (map[string]any, error) {
+func Columns(path, tablixName string) (map[string]any, error) {
 	doc, err := LoadXMLFile(path)
 	if err != nil {
 		return nil, err
 	}
 	ns := doc.Root.URI
-	tablix := findFirst(doc.Root, "Tablix", ns)
+	tablix, names := selectTablix(doc.Root, ns, tablixName)
 	if tablix == nil {
-		return map[string]any{"columns": make([]map[string]any, 0), "error": "No Tablix found"}, nil
+		message := "No Tablix found"
+		if len(names) > 1 && tablixName == "" {
+			message = "Multiple Tablix found; specify tablix_name"
+		} else if tablixName != "" {
+			message = fmt.Sprintf("Tablix %q not found", tablixName)
+		}
+		result := map[string]any{"columns": make([]map[string]any, 0), "error": message}
+		if len(names) > 0 {
+			result["tablixes"] = names
+		}
+		return result, nil
 	}
+	return map[string]any{"columns": columnsForTablix(tablix, ns)}, nil
+}
+
+func tablixSummaries(root *Element, ns string) []map[string]any {
+	tablixes := make([]map[string]any, 0)
+	for _, tablix := range findAll(root, "Tablix", ns) {
+		name, _ := attrValue(tablix, "Name").(string)
+		tablixes = append(tablixes, map[string]any{
+			"name":         name,
+			"dataset_name": textString(findChild(tablix, "DataSetName", ns)),
+			"column_count": len(columnsForTablix(tablix, ns)),
+		})
+	}
+	return tablixes
+}
+
+func selectTablix(root *Element, ns, tablixName string) (*Element, []string) {
+	tablixes := findAll(root, "Tablix", ns)
+	names := make([]string, 0, len(tablixes))
+	for _, tablix := range tablixes {
+		name, _ := attrValue(tablix, "Name").(string)
+		names = append(names, name)
+		if tablixName != "" && name == tablixName {
+			return tablix, names
+		}
+	}
+	if tablixName == "" && len(tablixes) == 1 {
+		return tablixes[0], names
+	}
+	return nil, names
+}
+
+func columnsForTablix(tablix *Element, ns string) []map[string]any {
 	widths := make([]any, 0)
 	for _, group := range findAll(tablix, "TablixColumns", ns) {
 		for _, column := range findChildren(group, "TablixColumn", ns) {
@@ -290,7 +335,7 @@ func Columns(path string) (map[string]any, error) {
 			}
 		}
 	}
-	return map[string]any{"columns": columns}, nil
+	return columns
 }
 
 func findChildren(parent *Element, local, uri string) []*Element {

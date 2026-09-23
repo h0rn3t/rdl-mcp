@@ -1,3 +1,4 @@
+// Package rdl reads, validates, compares, and edits SSRS report definitions.
 package rdl
 
 import (
@@ -147,9 +148,16 @@ func (doc *Document) EncodeXML() ([]byte, error) {
 	if doc == nil || doc.Root == nil {
 		return nil, errors.New("missing XML root")
 	}
-	var output bytes.Buffer
-	encoder := xml.NewEncoder(&output)
-	for _, token := range doc.before {
+	output := &bytes.Buffer{}
+	before := doc.before
+	if len(before) > 0 {
+		if bom, ok := before[0].(xml.CharData); ok && bytes.Equal(bom, []byte{0xef, 0xbb, 0xbf}) {
+			output = bytes.NewBuffer(bom)
+			before = before[1:]
+		}
+	}
+	encoder := xml.NewEncoder(output)
+	for _, token := range before {
 		if err := encoder.EncodeToken(token); err != nil {
 			return nil, fmt.Errorf("encode XML prolog: %w", err)
 		}
