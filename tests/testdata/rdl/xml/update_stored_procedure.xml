@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding='utf-8'?>
+<ns0:Report xmlns:ns0="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <ns0:DataSources>
+    <ns0:DataSource Name="TestDataSource">
+      <ns0:ConnectionProperties>
+        <ns0:DataProvider>SQL</ns0:DataProvider>
+        <ns0:ConnectString>Data Source=localhost;Initial Catalog=TestDB</ns0:ConnectString>
+      </ns0:ConnectionProperties>
+    </ns0:DataSource>
+  </ns0:DataSources>
+  <ns0:DataSets>
+    <ns0:DataSet Name="MainDataset">
+      <ns0:Query>
+        <ns0:DataSourceName>TestDataSource</ns0:DataSourceName>
+        <ns0:CommandType>StoredProcedure</ns0:CommandType>
+        <ns0:CommandText>usp_NewProcedure</ns0:CommandText>
+        <ns0:QueryParameters>
+          <ns0:QueryParameter Name="@StartDate">
+            <ns0:Value>=Parameters!StartDate.Value</ns0:Value>
+          </ns0:QueryParameter>
+        </ns0:QueryParameters>
+      </ns0:Query>
+      <ns0:Fields>
+        <ns0:Field Name="ID">
+          <ns0:DataField>ID</ns0:DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </ns0:Field>
+        <ns0:Field Name="Name">
+          <ns0:DataField>Name</ns0:DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </ns0:Field>
+        <ns0:Field Name="Amount">
+          <ns0:DataField>Amount</ns0:DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </ns0:Field>
+        <ns0:Field Name="CreatedDate">
+          <ns0:DataField>CreatedDate</ns0:DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </ns0:Field>
+      </ns0:Fields>
+    </ns0:DataSet>
+    <ns0:DataSet Name="LookupDataset">
+      <ns0:Query>
+        <ns0:DataSourceName>TestDataSource</ns0:DataSourceName>
+        <ns0:CommandType>StoredProcedure</ns0:CommandType>
+        <ns0:CommandText>usp_GetLookupData</ns0:CommandText>
+      </ns0:Query>
+      <ns0:Fields>
+        <ns0:Field Name="LookupID">
+          <ns0:DataField>LookupID</ns0:DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </ns0:Field>
+        <ns0:Field Name="LookupValue">
+          <ns0:DataField>LookupValue</ns0:DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </ns0:Field>
+      </ns0:Fields>
+    </ns0:DataSet>
+  </ns0:DataSets>
+  <ns0:ReportParameters>
+    <ns0:ReportParameter Name="StartDate">
+      <ns0:DataType>DateTime</ns0:DataType>
+      <ns0:Prompt>Start Date</ns0:Prompt>
+    </ns0:ReportParameter>
+    <ns0:ReportParameter Name="EndDate">
+      <ns0:DataType>DateTime</ns0:DataType>
+      <ns0:Prompt>End Date</ns0:Prompt>
+    </ns0:ReportParameter>
+  </ns0:ReportParameters>
+  <ns0:ReportSections>
+    <ns0:ReportSection>
+      <ns0:Body>
+        <ns0:ReportItems>
+          <ns0:Tablix Name="MainTable">
+            <ns0:TablixBody>
+              <ns0:TablixColumns>
+                <ns0:TablixColumn>
+                  <ns0:Width>1in</ns0:Width>
+                </ns0:TablixColumn>
+                <ns0:TablixColumn>
+                  <ns0:Width>2in</ns0:Width>
+                </ns0:TablixColumn>
+                <ns0:TablixColumn>
+                  <ns0:Width>1.5in</ns0:Width>
+                </ns0:TablixColumn>
+              </ns0:TablixColumns>
+              <ns0:TablixRows>
+                <ns0:TablixRow>
+                  <ns0:Height>0.25in</ns0:Height>
+                  <ns0:TablixCells>
+                    <ns0:TablixCell>
+                      <ns0:CellContents>
+                        <ns0:Textbox Name="HeaderID">
+                          <ns0:Paragraphs>
+                            <ns0:Paragraph>
+                              <ns0:TextRuns>
+                                <ns0:TextRun>
+                                  <ns0:Value>ID</ns0:Value>
+                                </ns0:TextRun>
+                              </ns0:TextRuns>
+                            </ns0:Paragraph>
+                          </ns0:Paragraphs>
+                        </ns0:Textbox>
+                      </ns0:CellContents>
+                    </ns0:TablixCell>
+                    <ns0:TablixCell>
+                      <ns0:CellContents>
+                        <ns0:Textbox Name="HeaderName">
+                          <ns0:Paragraphs>
+                            <ns0:Paragraph>
+                              <ns0:TextRuns>
+                                <ns0:TextRun>
+                                  <ns0:Value>Name</ns0:Value>
+                                </ns0:TextRun>
+                              </ns0:TextRuns>
+                            </ns0:Paragraph>
+                          </ns0:Paragraphs>
+                        </ns0:Textbox>
+                      </ns0:CellContents>
+                    </ns0:TablixCell>
+                    <ns0:TablixCell>
+                      <ns0:CellContents>
+                        <ns0:Textbox Name="HeaderAmount">
+                          <ns0:Paragraphs>
+                            <ns0:Paragraph>
+                              <ns0:TextRuns>
+                                <ns0:TextRun>
+                                  <ns0:Value>Amount</ns0:Value>
+                                </ns0:TextRun>
+                              </ns0:TextRuns>
+                            </ns0:Paragraph>
+                          </ns0:Paragraphs>
+                        </ns0:Textbox>
+                      </ns0:CellContents>
+                    </ns0:TablixCell>
+                  </ns0:TablixCells>
+                </ns0:TablixRow>
+                <ns0:TablixRow>
+                  <ns0:Height>0.25in</ns0:Height>
+                  <ns0:TablixCells>
+                    <ns0:TablixCell>
+                      <ns0:CellContents>
+                        <ns0:Textbox Name="DataID">
+                          <ns0:Paragraphs>
+                            <ns0:Paragraph>
+                              <ns0:TextRuns>
+                                <ns0:TextRun>
+                                  <ns0:Value>=Fields!ID.Value</ns0:Value>
+                                </ns0:TextRun>
+                              </ns0:TextRuns>
+                            </ns0:Paragraph>
+                          </ns0:Paragraphs>
+                        </ns0:Textbox>
+                      </ns0:CellContents>
+                    </ns0:TablixCell>
+                    <ns0:TablixCell>
+                      <ns0:CellContents>
+                        <ns0:Textbox Name="DataName">
+                          <ns0:Paragraphs>
+                            <ns0:Paragraph>
+                              <ns0:TextRuns>
+                                <ns0:TextRun>
+                                  <ns0:Value>=Fields!Name.Value</ns0:Value>
+                                </ns0:TextRun>
+                              </ns0:TextRuns>
+                            </ns0:Paragraph>
+                          </ns0:Paragraphs>
+                        </ns0:Textbox>
+                      </ns0:CellContents>
+                    </ns0:TablixCell>
+                    <ns0:TablixCell>
+                      <ns0:CellContents>
+                        <ns0:Textbox Name="DataAmount">
+                          <ns0:Paragraphs>
+                            <ns0:Paragraph>
+                              <ns0:TextRuns>
+                                <ns0:TextRun>
+                                  <ns0:Value>=Fields!Amount.Value</ns0:Value>
+                                  <ns0:Style>
+                                    <ns0:Format>#,0.00</ns0:Format>
+                                  </ns0:Style>
+                                </ns0:TextRun>
+                              </ns0:TextRuns>
+                            </ns0:Paragraph>
+                          </ns0:Paragraphs>
+                        </ns0:Textbox>
+                      </ns0:CellContents>
+                    </ns0:TablixCell>
+                  </ns0:TablixCells>
+                </ns0:TablixRow>
+              </ns0:TablixRows>
+            </ns0:TablixBody>
+            <ns0:TablixColumnHierarchy>
+              <ns0:TablixMembers>
+                <ns0:TablixMember />
+                <ns0:TablixMember />
+                <ns0:TablixMember />
+              </ns0:TablixMembers>
+            </ns0:TablixColumnHierarchy>
+            <ns0:TablixRowHierarchy>
+              <ns0:TablixMembers>
+                <ns0:TablixMember>
+                  <ns0:KeepWithGroup>After</ns0:KeepWithGroup>
+                </ns0:TablixMember>
+                <ns0:TablixMember>
+                  <ns0:Group Name="DetailGroup" />
+                </ns0:TablixMember>
+              </ns0:TablixMembers>
+            </ns0:TablixRowHierarchy>
+            <ns0:DataSetName>MainDataset</ns0:DataSetName>
+          </ns0:Tablix>
+        </ns0:ReportItems>
+      </ns0:Body>
+      <ns0:Page>
+        <ns0:PageWidth>8.5in</ns0:PageWidth>
+        <ns0:PageHeight>11in</ns0:PageHeight>
+        <ns0:LeftMargin>0.5in</ns0:LeftMargin>
+        <ns0:RightMargin>0.5in</ns0:RightMargin>
+      </ns0:Page>
+    </ns0:ReportSection>
+  </ns0:ReportSections>
+</ns0:Report>

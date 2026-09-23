@@ -1,0 +1,350 @@
+[
+  {
+    "name": "describe_rdl_report",
+    "description": "Get a high-level summary of the RDL report structure",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string",
+          "description": "Path to the RDL file"
+        }
+      },
+      "required": [
+        "filepath"
+      ]
+    }
+  },
+  {
+    "name": "get_rdl_datasets",
+    "description": "Get all datasets with their fields, queries, and stored procedures",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string",
+          "description": "Path to the RDL file"
+        },
+        "field_limit": {
+          "type": "integer",
+          "description": "Number of fields to return (0=none, -1=all)",
+          "default": 0
+        },
+        "field_pattern": {
+          "type": "string",
+          "description": "Regex pattern to filter fields"
+        }
+      },
+      "required": [
+        "filepath"
+      ]
+    }
+  },
+  {
+    "name": "get_rdl_parameters",
+    "description": "Get all report parameters with their types and values",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string",
+          "description": "Path to the RDL file"
+        }
+      },
+      "required": [
+        "filepath"
+      ]
+    }
+  },
+  {
+    "name": "get_rdl_columns",
+    "description": "Get table columns with headers, widths, and bindings",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string",
+          "description": "Path to the RDL file"
+        }
+      },
+      "required": [
+        "filepath"
+      ]
+    }
+  },
+  {
+    "name": "validate_rdl",
+    "description": "Validate RDL XML structure and field references",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string",
+          "description": "Path to the RDL file"
+        }
+      },
+      "required": [
+        "filepath"
+      ]
+    }
+  },
+  {
+    "name": "update_column_header",
+    "description": "Update a column header text",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string"
+        },
+        "old_header": {
+          "type": "string"
+        },
+        "new_header": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filepath",
+        "old_header",
+        "new_header"
+      ]
+    }
+  },
+  {
+    "name": "update_column_width",
+    "description": "Update a column width",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string"
+        },
+        "column_index": {
+          "type": "integer"
+        },
+        "new_width": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filepath",
+        "column_index",
+        "new_width"
+      ]
+    }
+  },
+  {
+    "name": "update_column_format",
+    "description": "Update the format string for a column",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string"
+        },
+        "column_index": {
+          "type": "integer"
+        },
+        "format_string": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filepath",
+        "column_index",
+        "format_string"
+      ]
+    }
+  },
+  {
+    "name": "add_column",
+    "description": "Add a new column to the report table",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string"
+        },
+        "column_index": {
+          "type": "integer"
+        },
+        "header_text": {
+          "type": "string"
+        },
+        "field_binding": {
+          "type": "string"
+        },
+        "width": {
+          "type": "string",
+          "default": "1in"
+        },
+        "format_string": {
+          "type": "string"
+        },
+        "footer_expression": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filepath",
+        "column_index",
+        "header_text",
+        "field_binding"
+      ]
+    }
+  },
+  {
+    "name": "remove_column",
+    "description": "Remove a column from the report table",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string"
+        },
+        "column_index": {
+          "type": "integer"
+        },
+        "auto_adjust_page_width": {
+          "type": "boolean",
+          "default": true,
+          "description": "If true, shrink page width to fit remaining columns plus margins"
+        }
+      },
+      "required": [
+        "filepath",
+        "column_index"
+      ]
+    }
+  },
+  {
+    "name": "update_stored_procedure",
+    "description": "Update the stored procedure for a dataset",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string"
+        },
+        "dataset_name": {
+          "type": "string"
+        },
+        "new_sproc": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filepath",
+        "dataset_name",
+        "new_sproc"
+      ]
+    }
+  },
+  {
+    "name": "add_dataset_field",
+    "description": "Add a new field to a dataset",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string"
+        },
+        "dataset_name": {
+          "type": "string"
+        },
+        "field_name": {
+          "type": "string"
+        },
+        "data_field": {
+          "type": "string"
+        },
+        "type_name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filepath",
+        "dataset_name",
+        "field_name",
+        "data_field",
+        "type_name"
+      ]
+    }
+  },
+  {
+    "name": "remove_dataset_field",
+    "description": "Remove a field from a dataset",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string"
+        },
+        "dataset_name": {
+          "type": "string"
+        },
+        "field_name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filepath",
+        "dataset_name",
+        "field_name"
+      ]
+    }
+  },
+  {
+    "name": "add_parameter",
+    "description": "Add a new report parameter",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "data_type": {
+          "type": "string"
+        },
+        "prompt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filepath",
+        "name",
+        "data_type",
+        "prompt"
+      ]
+    }
+  },
+  {
+    "name": "update_parameter",
+    "description": "Update an existing report parameter",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "filepath": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "prompt": {
+          "type": "string"
+        },
+        "default_value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "filepath",
+        "name"
+      ]
+    }
+  }
+]

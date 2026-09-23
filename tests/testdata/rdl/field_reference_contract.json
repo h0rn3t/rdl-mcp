@@ -1,0 +1,106 @@
+{
+  "simple": {
+    "expression": "=Fields!Name.Value",
+    "default_dataset": "MainDataset",
+    "with_context": {
+      "MainDataset": [
+        "Name"
+      ]
+    },
+    "fields": [
+      "Name"
+    ]
+  },
+  "aggregate": {
+    "expression": "=Sum(Fields!Amount.Value)",
+    "default_dataset": "MainDataset",
+    "with_context": {
+      "MainDataset": [
+        "Amount"
+      ]
+    },
+    "fields": [
+      "Amount"
+    ]
+  },
+  "scoped": {
+    "expression": "=First(Fields!LookupValue.Value, \"LookupDataset\")",
+    "default_dataset": "MainDataset",
+    "with_context": {
+      "LookupDataset": [
+        "LookupValue"
+      ]
+    },
+    "fields": [
+      "LookupValue"
+    ]
+  },
+  "lookup": {
+    "expression": "=Lookup(Fields!ID.Value, Fields!LookupID.Value, Fields!LookupValue.Value, \"LookupDataset\")",
+    "default_dataset": "MainDataset",
+    "with_context": {
+      "MainDataset": [
+        "ID"
+      ],
+      "LookupDataset": [
+        "LookupID",
+        "LookupValue"
+      ]
+    },
+    "fields": [
+      "ID",
+      "LookupID",
+      "LookupValue"
+    ]
+  },
+  "multi_lookup": {
+    "expression": "=MultiLookup(Fields!ID.Value, Fields!LookupID.Value, Fields!LookupValue.Value, \"LookupDataset\")",
+    "default_dataset": "MainDataset",
+    "with_context": {
+      "MainDataset": [
+        "ID"
+      ],
+      "LookupDataset": [
+        "LookupID",
+        "LookupValue"
+      ]
+    },
+    "fields": [
+      "ID",
+      "LookupID",
+      "LookupValue"
+    ]
+  },
+  "duplicate": {
+    "expression": "=IIF(Fields!Name.Value = Fields!Name.Value, Fields!Amount.Value, 0)",
+    "default_dataset": "MainDataset",
+    "with_context": {
+      "MainDataset": [
+        "Name",
+        "Amount"
+      ]
+    },
+    "fields": [
+      "Amount",
+      "Name"
+    ]
+  },
+  "unicode": {
+    "expression": "=Fields!Ångström.Value",
+    "default_dataset": "Embedded",
+    "with_context": {
+      "Embedded": [
+        "Ångström"
+      ]
+    },
+    "fields": [
+      "Ångström"
+    ]
+  },
+  "static": {
+    "expression": "Static Text",
+    "default_dataset": "MainDataset",
+    "with_context": {},
+    "fields": []
+  }
+}

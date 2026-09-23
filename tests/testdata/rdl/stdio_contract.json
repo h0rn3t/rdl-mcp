@@ -1,0 +1,1819 @@
+{
+  "handshake": [
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "result": {
+        "protocolVersion": "2024-11-05",
+        "serverInfo": {
+          "name": "rdl-mcp-server",
+          "version": "1.0.0"
+        },
+        "capabilities": {
+          "tools": {}
+        }
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": 2,
+      "result": {
+        "tools": [
+          {
+            "name": "describe_rdl_report",
+            "description": "Get a high-level summary of the RDL report structure",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Path to the RDL file"
+                }
+              },
+              "required": [
+                "filepath"
+              ]
+            }
+          },
+          {
+            "name": "get_rdl_datasets",
+            "description": "Get all datasets with their fields, queries, and stored procedures",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Path to the RDL file"
+                },
+                "field_limit": {
+                  "type": "integer",
+                  "description": "Number of fields to return (0=none, -1=all)",
+                  "default": 0
+                },
+                "field_pattern": {
+                  "type": "string",
+                  "description": "Regex pattern to filter fields"
+                }
+              },
+              "required": [
+                "filepath"
+              ]
+            }
+          },
+          {
+            "name": "get_rdl_parameters",
+            "description": "Get all report parameters with their types and values",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Path to the RDL file"
+                }
+              },
+              "required": [
+                "filepath"
+              ]
+            }
+          },
+          {
+            "name": "get_rdl_columns",
+            "description": "Get table columns with headers, widths, and bindings",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Path to the RDL file"
+                }
+              },
+              "required": [
+                "filepath"
+              ]
+            }
+          },
+          {
+            "name": "validate_rdl",
+            "description": "Validate RDL XML structure and field references",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "filepath": {
+                  "type": "string",
+                  "description": "Path to the RDL file"
+                }
+              },
+              "required": [
+                "filepath"
+              ]
+            }
+          },
+          {
+            "name": "update_column_header",
+            "description": "Update a column header text",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "filepath": {
+                  "type": "string"
+                },
+                "old_header": {
+                  "type": "string"
+                },
+                "new_header": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "filepath",
+                "old_header",
+                "new_header"
+              ]
+            }
+          },
+          {
+            "name": "update_column_width",
+            "description": "Update a column width",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "filepath": {
+                  "type": "string"
+                },
+                "column_index": {
+                  "type": "integer"
+                },
+                "new_width": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "filepath",
+                "column_index",
+                "new_width"
+              ]
+            }
+          },
+          {
+            "name": "update_column_format",
+            "description": "Update the format string for a column",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "filepath": {
+                  "type": "string"
+                },
+                "column_index": {
+                  "type": "integer"
+                },
+                "format_string": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "filepath",
+                "column_index",
+                "format_string"
+              ]
+            }
+          },
+          {
+            "name": "add_column",
+            "description": "Add a new column to the report table",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "filepath": {
+                  "type": "string"
+                },
+                "column_index": {
+                  "type": "integer"
+                },
+                "header_text": {
+                  "type": "string"
+                },
+                "field_binding": {
+                  "type": "string"
+                },
+                "width": {
+                  "type": "string",
+                  "default": "1in"
+                },
+                "format_string": {
+                  "type": "string"
+                },
+                "footer_expression": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "filepath",
+                "column_index",
+                "header_text",
+                "field_binding"
+              ]
+            }
+          },
+          {
+            "name": "remove_column",
+            "description": "Remove a column from the report table",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "filepath": {
+                  "type": "string"
+                },
+                "column_index": {
+                  "type": "integer"
+                },
+                "auto_adjust_page_width": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "If true, shrink page width to fit remaining columns plus margins"
+                }
+              },
+              "required": [
+                "filepath",
+                "column_index"
+              ]
+            }
+          },
+          {
+            "name": "update_stored_procedure",
+            "description": "Update the stored procedure for a dataset",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "filepath": {
+                  "type": "string"
+                },
+                "dataset_name": {
+                  "type": "string"
+                },
+                "new_sproc": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "filepath",
+                "dataset_name",
+                "new_sproc"
+              ]
+            }
+          },
+          {
+            "name": "add_dataset_field",
+            "description": "Add a new field to a dataset",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "filepath": {
+                  "type": "string"
+                },
+                "dataset_name": {
+                  "type": "string"
+                },
+                "field_name": {
+                  "type": "string"
+                },
+                "data_field": {
+                  "type": "string"
+                },
+                "type_name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "filepath",
+                "dataset_name",
+                "field_name",
+                "data_field",
+                "type_name"
+              ]
+            }
+          },
+          {
+            "name": "remove_dataset_field",
+            "description": "Remove a field from a dataset",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "filepath": {
+                  "type": "string"
+                },
+                "dataset_name": {
+                  "type": "string"
+                },
+                "field_name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "filepath",
+                "dataset_name",
+                "field_name"
+              ]
+            }
+          },
+          {
+            "name": "add_parameter",
+            "description": "Add a new report parameter",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "filepath": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "data_type": {
+                  "type": "string"
+                },
+                "prompt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "filepath",
+                "name",
+                "data_type",
+                "prompt"
+              ]
+            }
+          },
+          {
+            "name": "update_parameter",
+            "description": "Update an existing report parameter",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "filepath": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "prompt": {
+                  "type": "string"
+                },
+                "default_value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "filepath",
+                "name"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "cases": {
+    "describe_rdl_report": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "report_summary": {
+                "datasets": 2,
+                "parameters": 2,
+                "table_columns": 3
+              },
+              "datasets": [
+                {
+                  "name": "MainDataset",
+                  "command_type": "StoredProcedure",
+                  "command": "usp_GetTestData",
+                  "field_count": 4
+                },
+                {
+                  "name": "LookupDataset",
+                  "command_type": "StoredProcedure",
+                  "command": "usp_GetLookupData",
+                  "field_count": 2
+                }
+              ],
+              "filepath": "<RDL>"
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_datasets": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "datasets": [
+                {
+                  "name": "MainDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetTestData",
+                  "query_parameters": [
+                    {
+                      "name": "@StartDate",
+                      "value": "=Parameters!StartDate.Value"
+                    }
+                  ],
+                  "field_count": 4
+                },
+                {
+                  "name": "LookupDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetLookupData",
+                  "query_parameters": [],
+                  "field_count": 2
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_datasets_all": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "datasets": [
+                {
+                  "name": "MainDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetTestData",
+                  "query_parameters": [
+                    {
+                      "name": "@StartDate",
+                      "value": "=Parameters!StartDate.Value"
+                    }
+                  ],
+                  "field_count": 4,
+                  "fields": [
+                    {
+                      "name": "ID",
+                      "data_field": "ID",
+                      "type": "System.Int32"
+                    },
+                    {
+                      "name": "Name",
+                      "data_field": "Name",
+                      "type": "System.String"
+                    },
+                    {
+                      "name": "Amount",
+                      "data_field": "Amount",
+                      "type": "System.Decimal"
+                    },
+                    {
+                      "name": "CreatedDate",
+                      "data_field": "CreatedDate",
+                      "type": "System.DateTime"
+                    }
+                  ],
+                  "fields_truncated": false
+                },
+                {
+                  "name": "LookupDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetLookupData",
+                  "query_parameters": [],
+                  "field_count": 2,
+                  "fields": [
+                    {
+                      "name": "LookupID",
+                      "data_field": "LookupID",
+                      "type": "System.Int32"
+                    },
+                    {
+                      "name": "LookupValue",
+                      "data_field": "LookupValue",
+                      "type": "System.String"
+                    }
+                  ],
+                  "fields_truncated": false
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_datasets_filtered": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "datasets": [
+                {
+                  "name": "MainDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetTestData",
+                  "query_parameters": [
+                    {
+                      "name": "@StartDate",
+                      "value": "=Parameters!StartDate.Value"
+                    }
+                  ],
+                  "field_count": 4,
+                  "fields": [
+                    {
+                      "name": "Name",
+                      "data_field": "Name",
+                      "type": "System.String"
+                    }
+                  ],
+                  "fields_truncated": false
+                },
+                {
+                  "name": "LookupDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetLookupData",
+                  "query_parameters": [],
+                  "field_count": 2,
+                  "fields": [],
+                  "fields_truncated": false
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_datasets_lookbehind": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "datasets": [
+                {
+                  "name": "MainDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetTestData",
+                  "query_parameters": [
+                    {
+                      "name": "@StartDate",
+                      "value": "=Parameters!StartDate.Value"
+                    }
+                  ],
+                  "field_count": 4,
+                  "fields": [
+                    {
+                      "name": "Name",
+                      "data_field": "Name",
+                      "type": "System.String"
+                    }
+                  ],
+                  "fields_truncated": false
+                },
+                {
+                  "name": "LookupDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetLookupData",
+                  "query_parameters": [],
+                  "field_count": 2,
+                  "fields": [],
+                  "fields_truncated": false
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_datasets_named_group": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "datasets": [
+                {
+                  "name": "MainDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetTestData",
+                  "query_parameters": [
+                    {
+                      "name": "@StartDate",
+                      "value": "=Parameters!StartDate.Value"
+                    }
+                  ],
+                  "field_count": 4,
+                  "fields": [
+                    {
+                      "name": "Name",
+                      "data_field": "Name",
+                      "type": "System.String"
+                    }
+                  ],
+                  "fields_truncated": false
+                },
+                {
+                  "name": "LookupDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetLookupData",
+                  "query_parameters": [],
+                  "field_count": 2,
+                  "fields": [],
+                  "fields_truncated": false
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_datasets_named_backreference": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "datasets": [
+                {
+                  "name": "MainDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetTestData",
+                  "query_parameters": [
+                    {
+                      "name": "@StartDate",
+                      "value": "=Parameters!StartDate.Value"
+                    }
+                  ],
+                  "field_count": 4,
+                  "fields": [],
+                  "fields_truncated": false
+                },
+                {
+                  "name": "LookupDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetLookupData",
+                  "query_parameters": [],
+                  "field_count": 2,
+                  "fields": [
+                    {
+                      "name": "LookupID",
+                      "data_field": "LookupID",
+                      "type": "System.Int32"
+                    },
+                    {
+                      "name": "LookupValue",
+                      "data_field": "LookupValue",
+                      "type": "System.String"
+                    }
+                  ],
+                  "fields_truncated": false
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_datasets_backreference": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "datasets": [
+                {
+                  "name": "MainDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetTestData",
+                  "query_parameters": [
+                    {
+                      "name": "@StartDate",
+                      "value": "=Parameters!StartDate.Value"
+                    }
+                  ],
+                  "field_count": 4,
+                  "fields": [],
+                  "fields_truncated": false
+                },
+                {
+                  "name": "LookupDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetLookupData",
+                  "query_parameters": [],
+                  "field_count": 2,
+                  "fields": [
+                    {
+                      "name": "LookupID",
+                      "data_field": "LookupID",
+                      "type": "System.Int32"
+                    },
+                    {
+                      "name": "LookupValue",
+                      "data_field": "LookupValue",
+                      "type": "System.String"
+                    }
+                  ],
+                  "fields_truncated": false
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_datasets_invalid_pattern": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "datasets": [
+                {
+                  "name": "MainDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetTestData",
+                  "query_parameters": [
+                    {
+                      "name": "@StartDate",
+                      "value": "=Parameters!StartDate.Value"
+                    }
+                  ],
+                  "field_count": 4,
+                  "fields": [
+                    {
+                      "name": "ID",
+                      "data_field": "ID",
+                      "type": "System.Int32"
+                    },
+                    {
+                      "name": "Name",
+                      "data_field": "Name",
+                      "type": "System.String"
+                    },
+                    {
+                      "name": "Amount",
+                      "data_field": "Amount",
+                      "type": "System.Decimal"
+                    },
+                    {
+                      "name": "CreatedDate",
+                      "data_field": "CreatedDate",
+                      "type": "System.DateTime"
+                    }
+                  ],
+                  "fields_truncated": false
+                },
+                {
+                  "name": "LookupDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetLookupData",
+                  "query_parameters": [],
+                  "field_count": 2,
+                  "fields": [
+                    {
+                      "name": "LookupID",
+                      "data_field": "LookupID",
+                      "type": "System.Int32"
+                    },
+                    {
+                      "name": "LookupValue",
+                      "data_field": "LookupValue",
+                      "type": "System.String"
+                    }
+                  ],
+                  "fields_truncated": false
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_datasets_dotnet_pattern": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "datasets": [
+                {
+                  "name": "MainDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetTestData",
+                  "query_parameters": [
+                    {
+                      "name": "@StartDate",
+                      "value": "=Parameters!StartDate.Value"
+                    }
+                  ],
+                  "field_count": 4,
+                  "fields": [
+                    {
+                      "name": "ID",
+                      "data_field": "ID",
+                      "type": "System.Int32"
+                    },
+                    {
+                      "name": "Name",
+                      "data_field": "Name",
+                      "type": "System.String"
+                    },
+                    {
+                      "name": "Amount",
+                      "data_field": "Amount",
+                      "type": "System.Decimal"
+                    },
+                    {
+                      "name": "CreatedDate",
+                      "data_field": "CreatedDate",
+                      "type": "System.DateTime"
+                    }
+                  ],
+                  "fields_truncated": false
+                },
+                {
+                  "name": "LookupDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetLookupData",
+                  "query_parameters": [],
+                  "field_count": 2,
+                  "fields": [
+                    {
+                      "name": "LookupID",
+                      "data_field": "LookupID",
+                      "type": "System.Int32"
+                    },
+                    {
+                      "name": "LookupValue",
+                      "data_field": "LookupValue",
+                      "type": "System.String"
+                    }
+                  ],
+                  "fields_truncated": false
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_datasets_negative_limit": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "datasets": [
+                {
+                  "name": "MainDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetTestData",
+                  "query_parameters": [
+                    {
+                      "name": "@StartDate",
+                      "value": "=Parameters!StartDate.Value"
+                    }
+                  ],
+                  "field_count": 4,
+                  "fields": [
+                    {
+                      "name": "ID",
+                      "data_field": "ID",
+                      "type": "System.Int32"
+                    },
+                    {
+                      "name": "Name",
+                      "data_field": "Name",
+                      "type": "System.String"
+                    }
+                  ],
+                  "fields_truncated": true
+                },
+                {
+                  "name": "LookupDataset",
+                  "datasource": "TestDataSource",
+                  "command_type": "StoredProcedure",
+                  "command_text": "usp_GetLookupData",
+                  "query_parameters": [],
+                  "field_count": 2,
+                  "fields": [],
+                  "fields_truncated": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_parameters": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "parameters": [
+                {
+                  "name": "StartDate",
+                  "data_type": "DateTime",
+                  "prompt": "Start Date"
+                },
+                {
+                  "name": "EndDate",
+                  "data_type": "DateTime",
+                  "prompt": "End Date"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_columns": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "columns": [
+                {
+                  "index": 0,
+                  "header": "ID",
+                  "width": "1in",
+                  "textbox_name": "HeaderID",
+                  "field_binding": "=Fields!ID.Value",
+                  "field_name": "ID"
+                },
+                {
+                  "index": 1,
+                  "header": "Name",
+                  "width": "2in",
+                  "textbox_name": "HeaderName",
+                  "field_binding": "=Fields!Name.Value",
+                  "field_name": "Name"
+                },
+                {
+                  "index": 2,
+                  "header": "Amount",
+                  "width": "1.5in",
+                  "textbox_name": "HeaderAmount",
+                  "field_binding": "=Fields!Amount.Value",
+                  "field_name": "Amount",
+                  "format": "#,0.00"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "describe_rdl_report_empty": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "report_summary": {
+                "datasets": 0,
+                "parameters": 0,
+                "table_columns": 0
+              },
+              "datasets": [],
+              "filepath": "<RDL>"
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_datasets_empty": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "datasets": []
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_parameters_empty": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "parameters": []
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_columns_empty": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "columns": [],
+              "error": "No Tablix found"
+            }
+          }
+        ]
+      }
+    },
+    "describe_rdl_report_rich": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "report_summary": {
+                "datasets": 1,
+                "parameters": 2,
+                "table_columns": 0
+              },
+              "datasets": [
+                {
+                  "name": "Embedded",
+                  "command_type": "Embedded",
+                  "command": "",
+                  "field_count": 1
+                }
+              ],
+              "filepath": "<RDL>"
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_datasets_rich": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "datasets": [
+                {
+                  "name": "Embedded",
+                  "datasource": "",
+                  "command_type": "Embedded",
+                  "command_text": "",
+                  "query_parameters": [],
+                  "field_count": 1,
+                  "fields": [
+                    {
+                      "name": "Ångström",
+                      "data_field": "Ångström",
+                      "type": "System.String"
+                    }
+                  ],
+                  "fields_truncated": false
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_datasets_unicode": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "datasets": [
+                {
+                  "name": "Embedded",
+                  "datasource": "",
+                  "command_type": "Embedded",
+                  "command_text": "",
+                  "query_parameters": [],
+                  "field_count": 1,
+                  "fields": [
+                    {
+                      "name": "Ångström",
+                      "data_field": "Ångström",
+                      "type": "System.String"
+                    }
+                  ],
+                  "fields_truncated": false
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_datasets_named_unicode": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "datasets": [
+                {
+                  "name": "Embedded",
+                  "datasource": "",
+                  "command_type": "Embedded",
+                  "command_text": "",
+                  "query_parameters": [],
+                  "field_count": 1,
+                  "fields": [
+                    {
+                      "name": "Ångström",
+                      "data_field": "Ångström",
+                      "type": "System.String"
+                    }
+                  ],
+                  "fields_truncated": false
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "get_rdl_parameters_rich": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "parameters": [
+                {
+                  "name": "Choice",
+                  "data_type": "String",
+                  "prompt": "Pick one",
+                  "default_values": [
+                    "A"
+                  ],
+                  "valid_values": [
+                    {
+                      "value": "A",
+                      "label": "First"
+                    },
+                    {
+                      "value": "B",
+                      "label": "B"
+                    }
+                  ]
+                },
+                {
+                  "name": "Lookup",
+                  "data_type": "String",
+                  "prompt": "",
+                  "valid_values_dataset": "Embedded"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "validate_rdl": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "valid": true,
+              "message": "RDL structure is valid"
+            }
+          }
+        ]
+      }
+    },
+    "validate_rdl_empty": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "valid": false,
+              "issues": [
+                "No datasets found"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "validate_rdl_rich": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "valid": false,
+              "issues": [
+                "No Tablix (table) found"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "validate_rdl_bad_field": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "valid": false,
+              "issues": [
+                "Tablix \"MainTable\": Field \"NonExistent\" not found in dataset \"MainDataset\" (referenced in DataAmount). Available fields: Amount, CreatedDate, ID, Name"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "validate_rdl_malformed": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "valid": false,
+              "issues": [
+                "XML Parse Error: mismatched tag: line 1, column 19"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "update_column_header": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Updated header from \"Name\" to \"Full Name\""
+            }
+          }
+        ]
+      }
+    },
+    "update_column_width": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Updated column 0 width to 1.5in"
+            }
+          }
+        ]
+      }
+    },
+    "update_column_width_bad_index": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": false,
+              "message": "Invalid column index 99"
+            }
+          }
+        ]
+      }
+    },
+    "update_column_format": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Updated format for column 2 to \"C2\""
+            }
+          }
+        ]
+      }
+    },
+    "update_column_format_bad_index": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": false,
+              "message": "Column index 99 out of range"
+            }
+          }
+        ]
+      }
+    },
+    "update_column_format_negative": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Updated format for column -1 to \"C2\""
+            }
+          }
+        ]
+      }
+    },
+    "add_column": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Added column \"New\" at position 1"
+            }
+          }
+        ]
+      }
+    },
+    "add_column_custom": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Added column \"New\" at position 1"
+            }
+          }
+        ]
+      }
+    },
+    "add_column_footer": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Added column \"New\" at position 1"
+            }
+          }
+        ]
+      }
+    },
+    "add_column_end": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Added column \"Last\" at position 3"
+            }
+          }
+        ]
+      }
+    },
+    "add_column_bad_index": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": false,
+              "message": "Invalid column index 99. Must be 0-3"
+            }
+          }
+        ]
+      }
+    },
+    "remove_column": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Removed column at index 1"
+            }
+          }
+        ]
+      }
+    },
+    "remove_column_negative": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": false,
+              "message": "Invalid column index -1"
+            }
+          }
+        ]
+      }
+    },
+    "remove_column_no_adjust": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Removed column at index 1"
+            }
+          }
+        ]
+      }
+    },
+    "update_stored_procedure": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Updated stored procedure to \"usp_NewProcedure\""
+            }
+          }
+        ]
+      }
+    },
+    "update_stored_procedure_missing_dataset": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": false,
+              "message": "Dataset \"Missing\" not found"
+            }
+          }
+        ]
+      }
+    },
+    "add_dataset_field": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Added field \"NewField\" to dataset \"MainDataset\""
+            }
+          }
+        ]
+      }
+    },
+    "add_dataset_field_missing_dataset": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": false,
+              "message": "Dataset \"Missing\" not found"
+            }
+          }
+        ]
+      }
+    },
+    "remove_dataset_field": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Removed field \"CreatedDate\" from dataset \"MainDataset\""
+            }
+          }
+        ]
+      }
+    },
+    "remove_dataset_field_missing_field": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": false,
+              "message": "Field \"Missing\" not found in dataset \"MainDataset\""
+            }
+          }
+        ]
+      }
+    },
+    "remove_dataset_field_missing_dataset": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": false,
+              "message": "Dataset \"Missing\" not found"
+            }
+          }
+        ]
+      }
+    },
+    "add_parameter": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Added parameter \"NewParam\""
+            }
+          }
+        ]
+      }
+    },
+    "add_parameter_no_section": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Added parameter \"NewParam\""
+            }
+          }
+        ]
+      }
+    },
+    "update_parameter": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Updated parameter \"StartDate\": prompt to \"Updated start\""
+            }
+          }
+        ]
+      }
+    },
+    "update_parameter_default": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": true,
+              "message": "Updated parameter \"StartDate\": default value to \"2026-01-01\""
+            }
+          }
+        ]
+      }
+    },
+    "update_parameter_no_change": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": false,
+              "message": "No changes specified"
+            }
+          }
+        ]
+      }
+    },
+    "update_column_header_missing": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": false,
+              "message": "Header \"Missing\" not found"
+            }
+          }
+        ]
+      }
+    },
+    "remove_column_bad_index": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": false,
+              "message": "Invalid column index 99"
+            }
+          }
+        ]
+      }
+    },
+    "add_dataset_field_duplicate": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": false,
+              "message": "Field \"Name\" already exists"
+            }
+          }
+        ]
+      }
+    },
+    "add_parameter_duplicate": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": false,
+              "message": "Parameter \"StartDate\" already exists"
+            }
+          }
+        ]
+      }
+    },
+    "update_parameter_missing": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": {
+              "success": false,
+              "message": "Parameter \"Missing\" not found"
+            }
+          }
+        ]
+      }
+    },
+    "missing_filepath": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "error": {
+        "code": -32000,
+        "message": "MCPServer.describe_rdl_report() missing 1 required positional argument: 'filepath'"
+      }
+    },
+    "unknown_tool": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "error": {
+        "code": -32601,
+        "message": "Unknown tool: no_such_tool"
+      }
+    },
+    "invalid_json": {
+      "jsonrpc": "2.0",
+      "id": null,
+      "error": {
+        "code": -32700,
+        "message": "Parse error"
+      }
+    },
+    "unknown_method": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "error": {
+        "code": -32601,
+        "message": "Method not found: no_such_method"
+      }
+    }
+  }
+}

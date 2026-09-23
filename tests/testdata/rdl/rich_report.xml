@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner" xmlns:ext="urn:vendor">
+  <DataSets>
+    <DataSet Name="Embedded">
+      <Fields>
+        <Field Name="Ångström"><DataField>Ångström</DataField><rd:TypeName>System.String</rd:TypeName></Field>
+      </Fields>
+    </DataSet>
+  </DataSets>
+  <ext:DataSet Name="Ignored" />
+  <ReportParameters>
+    <ReportParameter Name="Choice">
+      <DataType>String</DataType><Prompt>Pick one</Prompt>
+      <DefaultValue><Values><Value>A</Value><Value /></Values></DefaultValue>
+      <ValidValues><ParameterValues><ParameterValue><Value>A</Value><Label>First</Label></ParameterValue><ParameterValue><Value>B</Value></ParameterValue></ParameterValues></ValidValues>
+    </ReportParameter>
+    <ReportParameter Name="Lookup">
+      <DataType>String</DataType>
+      <ValidValues><DataSetReference><DataSetName>Embedded</DataSetName></DataSetReference></ValidValues>
+    </ReportParameter>
+  </ReportParameters>
+</Report>

@@ -1,251 +1,206 @@
-# RDL MCP Server
+# Сервер RDL MCP
 
 mcp-name: io.github.bethmaloney/rdl-mcp
 
-[![PyPI](https://img.shields.io/pypi/v/rdl-mcp.svg)](https://pypi.org/project/rdl-mcp/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![MCP](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io)
+[![Go 1.27+](https://img.shields.io/badge/Go-1.27%2B-00ADD8.svg)](https://go.dev/doc/install)
+[![Ліцензія MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![MCP](https://img.shields.io/badge/MCP-сумісний-green.svg)](https://modelcontextprotocol.io)
 
-Edit SSRS reports using AI assistants instead of wrestling with 2000+ lines of XML. This [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server gives Claude, Copilot, and other AI tools simple commands to read and modify RDL files.
+RDL MCP дає Claude, GitHub Copilot та іншим MCP-клієнтам інструменти для читання й редагування звітів SSRS у форматі RDL. Сервер працює як самостійний Go-бінарник через stdio.
 
-## What It Does
+## Можливості
 
-**Read reports:**
-- `describe_rdl_report` - Get report structure overview
-- `get_rdl_datasets` - View datasets, fields, and stored procedures (supports field limiting and filtering)
-- `get_rdl_parameters` - List all report parameters
-- `get_rdl_columns` - See column headers, widths, and bindings
+**Читання звітів:**
 
-**Modify reports:**
-- `update_column_header` / `update_column_width` - Change columns
-- `add_column` / `remove_column` - Add or remove columns
-- `update_column_format` - Change number/date formatting
-- `update_stored_procedure` - Swap stored procedures
-- `add_dataset_field` / `remove_dataset_field` - Manage dataset fields
-- `add_parameter` / `update_parameter` - Manage parameters
-- `validate_rdl` - Validate XML after changes
+- `describe_rdl_report` — огляд структури звіту.
+- `get_rdl_datasets` — датасети, поля та збережені процедури; підтримуються обмеження й фільтрація полів.
+- `get_rdl_parameters` — параметри звіту.
+- `get_rdl_columns` — заголовки, ширини та прив'язки колонок.
+- `validate_rdl` — перевірка XML, структури звіту та посилань на поля.
 
-**Why it's better than editing XML:**
-- AI sees clean JSON instead of verbose XML namespaces
-- One-line commands instead of error-prone string manipulation
-- Automatic validation catches errors before they break reports
-- No dependencies - just Python 3.8+ standard library
+**Редагування звітів:**
 
-## Installation
+- `update_column_header`, `update_column_width`, `update_column_format` — зміна колонок.
+- `add_column`, `remove_column` — додавання й вилучення колонок Tablix.
+- `update_stored_procedure` — зміна збереженої процедури датасету.
+- `add_dataset_field`, `remove_dataset_field` — керування полями датасету.
+- `add_parameter`, `update_parameter` — додавання й оновлення параметрів.
 
-**Requirements:**
-- Python 3.8 or higher
-- [uv](https://docs.astral.sh/uv/) (Python package manager and tool runner)
+## Встановлення
 
-**Installing uv:**
-- **macOS/Linux:** `curl -LsSf https://astral.sh/uv/install.sh | sh`
-- **Windows:** `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
-- **Alternative (all platforms):** `pip install uv` or see [installation docs](https://docs.astral.sh/uv/getting-started/installation/)
+Для збирання потрібен Go 1.27 або новіший. Після публікації Go-версії репозиторію використовуйте один із варіантів нижче.
 
-**Note:** `uvx` (included with `uv`) automatically handles the Python environment and dependencies. No manual Python package installation needed!
+### Встановити виконуваний файл
 
-### Quick Start
+Встановіть сервер до каталогу `GOBIN` або, якщо його не задано, до `$GOPATH/bin`:
+
+```sh
+go install github.com/h0rn3t/rdl-mcp/cmd/rdl-mcp@latest
+```
+
+Переконайтеся, що каталог із `rdl-mcp` є у `PATH`. Для локальної робочої копії репозиторію виконайте команду з його кореня:
+
+```sh
+go install ./cmd/rdl-mcp
+```
+
+Команда з `@latest` доступна, коли Go-версія опублікована у вказаному Go-модулі.
+
+### Додати сервер до Go-модуля через `go get`
+
+У Go 1.24 і новіших `go get -tool` додає виконуваний інструмент до `go.mod`; запустити його можна командою `go tool`. Створіть окремий модуль або використайте наявний:
+
+```sh
+mkdir rdl-mcp-tools
+cd rdl-mcp-tools
+go mod init example.com/rdl-mcp-tools
+go get -tool github.com/h0rn3t/rdl-mcp/cmd/rdl-mcp@latest
+go tool rdl-mcp
+```
+
+Ця команда реєструє MCP-сервер як інструмент поточного Go-модуля. Звичайний `go get` оновлює залежності в `go.mod`; для глобального встановлення виконуваного файла використовуйте `go install`. Докладніше: [про `go get` та встановлення команд](https://go.dev/doc/go-get-install-deprecation) і [керування інструментами Go](https://go.dev/doc/modules/managing-dependencies).
+
+Щоб MCP-клієнт запускав варіант із `go get -tool`, вкажіть шлях до цього модуля:
+
+```json
+{
+  "command": "go",
+  "args": ["-C", "/шлях/до/rdl-mcp-tools", "tool", "rdl-mcp"]
+}
+```
+
+### Налаштувати MCP-клієнт
+
+У прикладах нижче `/шлях/до/rdl-mcp` — абсолютний шлях до встановленого бінарника. Для запуску через Go tool див. конфігурацію вище.
 
 <details>
 <summary><b>Claude Desktop</b></summary>
 
-Edit config file:
-- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
-- **Linux:** `~/.config/Claude/claude_desktop_config.json`
+Додайте запис у `claude_desktop_config.json`:
+
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+- Linux: `~/.config/Claude/claude_desktop_config.json`
 
 ```json
 {
   "mcpServers": {
     "rdl-mcp": {
-      "command": "uvx",
-      "args": ["rdl-mcp"]
+      "command": "/шлях/до/rdl-mcp",
+      "args": []
     }
   }
 }
 ```
+
 </details>
 
 <details>
-<summary><b>GitHub Copilot (VSCode)</b></summary>
+<summary><b>GitHub Copilot у VS Code</b></summary>
 
-Add to VSCode settings (`.vscode/mcp.json` in your workspace or user settings):
+Додайте запис у `.vscode/mcp.json` у робочому просторі або в конфігурацію користувача:
 
 ```json
 {
   "servers": {
-    "rdlMcp": {
+    "rdl-mcp": {
       "type": "stdio",
-      "command": "uvx",
-      "args": ["rdl-mcp"]
+      "command": "/шлях/до/rdl-mcp",
+      "args": []
     }
   }
 }
 ```
 
-**Note:** Requires VSCode with Copilot Chat extension installed.
+Потрібні VS Code та GitHub Copilot Chat із підтримкою MCP.
+
 </details>
 
+Після зміни конфігурації перезапустіть клієнт або перезапустіть MCP-сервер у ньому. Перевірте підключення запитом на кшталт: «Опиши структуру мого файлу report.rdl».
 
-**After installation:** Restart your AI assistant and try: `"Describe the structure of my report.rdl file"`
+### Налагодження
+
+Сервер читає рівень і шлях журналу з таких змінних середовища:
+
+- `RDL_MCP_LOG_LEVEL`: `DEBUG`, `INFO`, `WARNING` або `ERROR`.
+- `RDL_MCP_LOG_FILE`: шлях до файлу журналу.
+
+Діагностика пишеться у stderr або у вказаний файл, щоб не порушувати MCP-обмін через stdout.
+
+## Приклади запитів
+
+- «Які датасети використовує цей звіт?»
+- «Зміни ширину колонки Account Number на 2 дюйми».
+- «Відформатуй Amount як валюту з двома десятковими знаками».
+- «Додай колонку Amount із сумою у підсумковому рядку».
+- «Додай колонку Status без виразу у підсумковому рядку».
+- «Заміни процедуру основного датасету на V2 і додай поле TaxAmount».
+- «Вилучи застарілу колонку Status».
+- «Додай параметр Year для фільтрації звіту».
+
+## Довідник інструментів
 
 <details>
-<summary>Optional: Enable debug logging</summary>
+<summary>Переглянути аргументи 15 інструментів</summary>
 
-Set environment variables:
-- `RDL_MCP_LOG_LEVEL`: `DEBUG`, `INFO`, `WARNING`, or `ERROR`
-- `RDL_MCP_LOG_FILE`: Path to log file
-</details>
+### Читання
 
-## Usage
+- `describe_rdl_report(filepath)` — структура звіту.
+- `get_rdl_datasets(filepath, field_limit?, field_pattern?)` — датасети та їхні поля.
+  - `field_limit`: `0` — лише кількість полів (типово), `-1` — усі поля, `N` — не більше `N` полів.
+  - `field_pattern`: необов'язковий регулярний вираз для назв полів.
+- `get_rdl_parameters(filepath)` — параметри.
+- `get_rdl_columns(filepath)` — колонки Tablix.
+- `validate_rdl(filepath)` — перевірка звіту.
 
-Just ask your AI assistant in natural language:
+### Редагування
 
-- "What datasets does this report use?"
-- "Make the Account Number column 2 inches wide"
-- "Format the Amount column as currency with 2 decimals"
-- "Add a new Amount column that shows the sum in the footer"
-- "Add a Status column but leave the footer blank"
-- "Update the main dataset to use the V2 stored procedure and add the TaxAmount field"
-- "Remove the obsolete Status column"
-- "Add a Year parameter to filter the report"
+- `update_column_header(filepath, old_header, new_header)` — змінити текст заголовка.
+- `update_column_width(filepath, column_index, new_width)` — змінити ширину, наприклад `2.5in`.
+- `update_column_format(filepath, column_index, format_string)` — змінити формат, наприклад `#,0.00`, `dd/MM/yyyy` або `C2`.
+- `add_column(filepath, column_index, header_text, field_binding, width?, format_string?, footer_expression?)` — додати колонку.
+  - `footer_expression` — необов'язковий вираз підсумкового рядка, наприклад `=Sum(Fields!Amount.Value)`, `=Count(Fields!ID.Value)` або `Total:`.
+- `remove_column(filepath, column_index)` — вилучити колонку.
+- `update_stored_procedure(filepath, dataset_name, new_sproc)` — змінити процедуру датасету.
+- `add_dataset_field(filepath, dataset_name, field_name, data_field, type_name)` — додати поле.
+- `remove_dataset_field(filepath, dataset_name, field_name)` — вилучити поле.
+- `add_parameter(filepath, name, data_type, prompt)` — додати параметр.
+- `update_parameter(filepath, name, prompt?, default_value?)` — оновити параметр.
 
-The AI assistant will use the appropriate MCP tools automatically.
-
-## Example: Editing vs. XML
-
-**Without MCP** (manually editing XML):
-```xml
-<!-- Find this in 2000+ lines -->
-<TablixCell><CellContents><Textbox><Paragraphs>
-  <Paragraph><TextRuns><TextRun>
-    <Value>Old Header</Value>
-  </TextRun></TextRuns></Paragraph>
-</Paragraphs></Textbox></CellContents></TablixCell>
-```
-
-**With MCP** (one command):
-```python
-update_column_header(filepath="report.rdl",
-                     old_header="Old Header",
-                     new_header="New Header")
-```
-
-## API Reference
-
-<details>
-<summary>View all available tools</summary>
-
-### Reading Tools
-
-- **`describe_rdl_report(filepath)`** - Report structure summary
-- **`get_rdl_datasets(filepath, field_limit?, field_pattern?)`** - Datasets with fields and stored procedures
-  - `field_limit`: 0 = counts only (default), -1 = all fields, N = limit to N fields
-  - `field_pattern`: Optional regex to filter field names
-- **`get_rdl_parameters(filepath)`** - All parameters with configurations
-- **`get_rdl_columns(filepath)`** - Column headers, widths, bindings
-
-### Editing Tools
-
-- **`update_column_header(filepath, old_header, new_header)`** - Change column text
-- **`update_column_width(filepath, column_index, new_width)`** - Modify width (e.g. "2.5in")
-- **`update_column_format(filepath, column_index, format_string)`** - Change format (e.g. "#,0.00", "dd/MM/yyyy", "C2")
-- **`add_column(filepath, column_index, header_text, field_binding, width?, format_string?, footer_expression?)`** - Add column
-  - `footer_expression`: Optional expression for footer/total row - e.g. "=Sum(Fields!Amount.Value)", "=Count(Fields!ID.Value)", "Total:", or leave empty
-- **`remove_column(filepath, column_index)`** - Remove column
-- **`update_stored_procedure(filepath, dataset_name, new_sproc)`** - Change dataset sproc
-- **`add_dataset_field(filepath, dataset_name, field_name, data_field, type_name)`** - Add field to dataset
-- **`remove_dataset_field(filepath, dataset_name, field_name)`** - Remove field from dataset
-- **`add_parameter(filepath, name, data_type, prompt)`** - Add new parameter
-- **`update_parameter(filepath, name, prompt?, default_value?)`** - Update parameter
-- **`validate_rdl(filepath)`** - Validate XML structure
-
-All tools return `{success: bool, message?: string, error?: string}` or structured data.
+Інструменти редагування повертають результат операції; помилки та бізнес-відмови містять пояснення.
 
 </details>
 
-## Limitations & Roadmap
+## Обмеження
 
-**Current limitations:**
-- Tablix (table) controls only - no Matrix or Chart support yet
-- Works best with standard report layouts
-- Some complex RDL features may still need manual XML editing
+- Підтримуються звіти RDL 2016 і таблиці Tablix.
+- Matrix та Chart не підтримуються.
+- Для складних конструкцій RDL може знадобитися ручне редагування XML.
 
-**Planned features:**
-- Column reordering, grouping, and sorting configuration
-- Expression builder helpers
-- Dataset field management
+## Усунення проблем
 
-## Troubleshooting
+**Сервер не з'являється у клієнті:**
 
-**Server not appearing?**
-- Check absolute path in config is correct
-- Verify Python 3.8+: `python3 --version`
-- Restart your MCP client
+- Перевірте, що в конфігурації вказаний абсолютний шлях до бінарника.
+- Переконайтеся, що Go встановлений, якщо клієнт запускає сервер через `go tool`.
+- Перезапустіть MCP-сервер або клієнт після зміни конфігурації.
 
-**Permission errors?**
-- Make script executable: `chmod +x rdl_mcp_server.py`
-- Check RDL file read/write permissions
+**Помилка доступу до RDL:**
 
+- Перевірте, що користувач має права читати й записувати файл.
+- Для запуску через Go tool перевірте шлях у параметрі `-C`.
 
+## Розробка
 
-## Releasing a New Version
+Потрібен Go 1.27 або новіший. Основні локальні перевірки:
 
-This server is published to [PyPI](https://pypi.org/project/rdl-mcp/) and the [MCP Registry](https://registry.modelcontextprotocol.io/). To release a new version:
+```sh
+go build ./...
+go vet ./...
+go test -race ./...
+```
 
-1. **Update version numbers** in both files:
+Пропозиції змін вітаються. Перед відкриттям PR створіть гілку, внесіть зміну та додайте перевірку поведінки.
+## Ліцензія
 
-   `pyproject.toml`:
-   ```toml
-   version = "0.2.0"
-   ```
-
-   `server.json`:
-   ```json
-   {
-     "version": "0.2.0",
-     "packages": [
-       {
-         "version": "0.2.0"
-       }
-     ]
-   }
-   ```
-
-2. **Commit your changes**:
-   ```bash
-   git add .
-   git commit -m "Release v0.2.0: Add feature description"
-   ```
-
-3. **Create and push a git tag**:
-   ```bash
-   git tag v0.2.0
-   git push origin main --tags
-   ```
-
-4. **Automated publishing**: The GitHub Actions workflows automatically:
-   - Build and publish to PyPI (users can install via `uvx rdl-mcp`)
-   - Validate `server.json` against the MCP schema
-   - Publish to the MCP Registry (server appears in registry search)
-   - Update downstream registries (like GitHub's MCP marketplace)
-
-## Contributing
-
-PRs welcome! Priority areas:
-- Better column detection for complex layouts
-- More editing operations (reordering, grouping, etc.)
-
-Requirements: Python standard library only
-
-1. Fork repo
-2. Create feature branch
-3. Make changes + tests
-4. Submit PR
-
-## License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
-This means you're free to use, modify, and distribute this software for any purpose, commercial or non-commercial.
+MIT. Докладніше — у файлі [LICENSE](LICENSE).
