@@ -3,8 +3,10 @@
 ## Стан
 
 - OpenSpec change: `migrate-rdl-mcp-to-go` (`openspec/changes/migrate-rdl-mcp-to-go/`).
-- Python лишається поведінковим еталоном до підтвердження паритету всіх 15 tools.
-- Публікація, вилучення Python і зміна користувацької команди належать до завершальних кроків плану.
+- На пряме рішення користувача прибрано Python runtime/package, їхні тести й налаштування, PyPI workflow та локальні MCP Registry metadata/workflow; зовнішні записи й релізи не змінювалися.
+- Go-контрактні JSON/XML fixtures залишилися в `tests/testdata/rdl/`; Go build і тести не залежать від зовнішнього runtime.
+- Паритет за наявними fixtures для 15 tools підтверджувався раніше. Запуск Claude Desktop і VS Code/Copilot у UI та повний синтаксичний паритет довільних `field_pattern` ще не підтверджені.
+- Згадки попереднього runtime і команд у таблиці нижче — історія перевірок та інструкція відкату; вони не потрібні для поточного Go runtime.
 
 ## Порядок зрізів
 
@@ -12,14 +14,14 @@
 2. Додати Go module і перенести XML, читання, валідацію, колонки, датасети та параметри.
 3. Під'єднати офіційний MCP Go SDK, порівняти 15 tools, stdio та помилки.
 4. Перевірити Go збірку, vet і race тести, а потім підготувати клієнтські та release artifacts.
-5. Лише після підтвердження паритету прибрати Python runtime; публікація потребує окремого рішення.
+5. Прибрати попередній runtime/package після контрактних порівнянь; цей крок виконано за прямим рішенням користувача. Go release і новий MCP Registry запис потребують окремого рішення.
 
 ## Перевірки
 
 | Зріз | Команда (cwd: корінь репозиторію) | Результат | Середовище |
 |---|---|---|---|
 | Python baseline | `python3 -m pytest tests/ -v` | 36 passed in 0.07s | 2026-09-23, macOS arm64, Python 3.14.7, pytest 9.0.2 |
-| Python stdio fixtures | `python3 tests/baseline_stdio.py record` і `python3 tests/baseline_stdio.py verify` | 15 tools, 62 cases, 17 XML outputs; verify passed | `tests/baseline/`, сформовано через `rdl_mcp_server.py` зі зразків `sample_report.xml`, `empty_report.xml`, `rich_report.xml`, `footer_report.xml`, `no_params.xml` та некоректних RDL |
+| Python stdio fixtures (історичний запис) | `python3 tests/baseline_stdio.py record` і `python3 tests/baseline_stdio.py verify` | 15 tools, 62 cases, 17 XML outputs; verify passed | fixtures збережені в `tests/testdata/rdl/`; запис сформовано до вилучення runtime |
 | Go scaffold | `go build ./...`; `go vet ./...`; `go test -race ./...`; `go mod tidy -diff` | усі команди пройшли; Go тестів ще немає | Go 1.27.1 darwin/arm64, module `github.com/h0rn3t/rdl-mcp` |
 | XML RDL 2016 | `go build ./...`; `go vet ./...`; `go test -race ./...`; `gofmt -l cmd/rdl-mcp/main.go internal/rdl/xml.go internal/rdl/xml_contract_test.go` | пройшли, gofmt не вивів файлів | `internal/rdl/xml_contract_test.go`, вкладені namespace й точкова зміна; 2026-09-23 |
 | Чотири read-only tools | `go build ./...`; `go vet ./...`; `go test -race ./...`; `golangci-lint run ./...`; `govulncheck ./...`; `go mod tidy -diff` | пройшли; lint: 0 issues; vulnerabilities: none found | `internal/rdl/reader_contract_test.go`, Python stdio baseline; 2026-09-23 |
@@ -32,6 +34,7 @@
 | Спільний Go gate | `go build ./...`; `go vet ./...`; `go test -race ./...`; `golangci-lint run ./...`; `govulncheck ./...`; `openspec validate migrate-rdl-mcp-to-go` | пройшли; lint: 0 issues; vulnerabilities: none found; OpenSpec valid | увесь Go module і поточний OpenSpec change; 2026-09-23 |
 | Бінарники для клієнтської перевірки | `CGO_ENABLED=0 GOOS=<os> GOARCH=<arch> go build -trimpath -ldflags='-s -w'` для darwin/linux/windows × amd64/arm64; локальний stdio smoke `dist/rdl-mcp_darwin_arm64` | 6 крос-компіляцій пройшли; native macOS ARM64: handshake, 15 tools, read, edit, EOF пройшли | `dist/` (gitignored), `SHA256SUMS`; виконання на Linux/Windows і клієнтський UI ще не перевірені |
 | Повторна перевірка зрізу 4.1 | 6 крос-компіляцій; `go build ./...`; `go vet ./...`; `go test -race ./...`; `go test ./cmd/rdl-mcp -run 'TestStdioSessionAndEOF|TestMalformedJSONEndsSession' -count=1`; `shasum -a 256 -c dist/SHA256SUMS` | усі збірки, Go gate, stdio smoke і SHA-256 пройшли; Claude Desktop та VS Code/Copilot UI-виклики не перевірені | 2026-09-23; спроба прочитати UI через `System Events` зупинилася на macOS `not allowed assistive access` |
+| Go-only cleanup | `go build ./...`; `go vet ./...`; `go test -race -count=1 ./...`; stdio smoke; `go mod tidy -diff` | усі команди пройшли; Go-код, contract fixtures, документація та збірка більше не потребують Python файлів чи інструментів | 2026-09-23; fixtures перенесені в `tests/testdata/rdl/`; старий `server.json` і release workflows вилучені з checkout |
 
 ## Рішення щодо регулярних виразів
 
@@ -45,8 +48,13 @@
 
 ## Контрольна точка
 
-- Поточний зріз: 4.1, клієнтська перевірка. Повторні 6 крос-компіляцій, Go gate, stdio smoke та перевірка SHA-256 пройшли; Claude Desktop та VS Code/Copilot ще не підтверджені. macOS заблокувала читання керування UI через `System Events` (`not allowed assistive access`), тому ці перевірки лишаються невиконаними.
+- Клієнтська перевірка 4.1 залишається відкритою. Повторні 6 крос-компіляцій, Go gate, stdio smoke та перевірка SHA-256 пройшли; Claude Desktop та VS Code/Copilot не підтверджені. macOS заблокувала читання UI через `System Events` (`not allowed assistive access`).
 - Підготовлені ізольовані приклади: `dist/claude-desktop-snippet.json`, `dist/vscode-mcp-snippet.json`, окремі копії `dist/claude-smoke.rdl` і `dist/vscode-smoke.rdl`. Приклади слід додавати до чинних конфігурацій, не замінюючи їх.
-- Блокери до cutover: обидва цільові клієнти мають побачити 15 tools та виконати read/edit; далі MCPB/registry schema, документація/CI, видалення Python після підтвердження паритету та окреме рішення про публікацію.
-- Наступна дія: у кожному клієнті додати відповідний snippet, перезапустити/оновити клієнт, підтвердити 15 tools і виконати read/edit на підготовленому RDL; після цього перевірити пакетування MCPB.
+- Go runtime cleanup виконано за прямим рішенням користувача й пройдено Go-only gate. Публічний MCP Registry запис не змінювався. Для Go-розповсюдження треба створити MCPB manifest, пакет і новий `server.json` у завданні 4.2.
+- Наступна дія: підтвердити виклики в Claude Desktop та VS Code/Copilot; окремо підготувати MCPB/registry metadata і Go CI/release workflow.
 - Прийняті розбіжності: формулювання XML parse error, припинення сеансу після невалідного JSON, форма помилки відсутнього `filepath`, форматування JSON/XML і SDK metadata. Повний синтаксичний паритет Python `re` лишається непідтвердженим ризиком.
+
+## Відкат
+
+- Попередні опубліковані релізи на PyPI не видалялися. Відновіть checkout із ревізії, що містить попередню реалізацію, і поверніть клієнтський запис `command: "uvx"`, `args: ["rdl-mcp"]`.
+- Якщо потрібно відновити пакетування з цього checkout, поверніть `pyproject.toml`, `setup.py` та PyPI workflow з тієї ж ревізії. Новий Go release не публікувався.
