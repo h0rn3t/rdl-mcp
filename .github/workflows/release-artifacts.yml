@@ -1,0 +1,64 @@
+name: Підготовка Go artifacts
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Перевірити версію release
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          version=${TAG_NAME#v}
+          registry_version=$(jq -r '.version' server.json)
+          manifest_version=$(jq -r '.version' mcpb/manifest.json)
+          test "$version" = "$registry_version"
+          test "$version" = "$manifest_version"
+      - name: Перевірити Go-код
+        run: |
+          go build ./...
+          go vet ./...
+          go test -race ./...
+          go mod tidy -diff
+      - name: Зібрати бінарники для платформ
+        run: |
+          mkdir -p dist
+          for target in darwin/amd64 darwin/arm64 linux/amd64 linux/arm64 windows/amd64 windows/arm64; do
+            os=${target%/*}
+            arch=${target#*/}
+            ext=
+            if [ "$os" = windows ]; then ext=.exe; fi
+            CGO_ENABLED=0 GOOS="$os" GOARCH="$arch" go build -buildvcs=false -trimpath -ldflags='-s -w -buildid=' -o "dist/rdl-mcp_${os}_${arch}${ext}" ./cmd/rdl-mcp
+          done
+      - name: Створити MCPB та метадані реєстру
+        run: |
+          chmod +x mcpb/rdl-mcp scripts/package-mcpb.sh
+          scripts/package-mcpb.sh
+          hash=$(sha256sum dist/rdl-mcp.mcpb | cut -d ' ' -f 1)
+          jq --arg hash "$hash" '.packages[0].fileSha256 = $hash' server.json > dist/server.json
+          (cd dist && sha256sum rdl-mcp_* rdl-mcp.mcpb > SHA256SUMS)
+          (cd dist && sha256sum -c SHA256SUMS)
+      - name: Перевірити метадані MCP Registry
+        run: |
+          curl -fsSL https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz -o /tmp/mcp-publisher.tar.gz
+          tar -xzf /tmp/mcp-publisher.tar.gz -C /tmp mcp-publisher
+          /tmp/mcp-publisher validate dist/server.json
+      - uses: actions/upload-artifact@v6
+        with:
+          name: rdl-mcp-${{ github.ref_name }}
+          path: |
+            dist/rdl-mcp_*
+            dist/rdl-mcp.mcpb
+            dist/SHA256SUMS
+            dist/server.json
+          if-no-files-found: error

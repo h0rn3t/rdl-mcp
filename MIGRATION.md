@@ -36,6 +36,8 @@
 | Повторна перевірка зрізу 4.1 | 6 крос-компіляцій; `go build ./...`; `go vet ./...`; `go test -race ./...`; `go test ./cmd/rdl-mcp -run 'TestStdioSessionAndEOF|TestMalformedJSONEndsSession' -count=1`; `shasum -a 256 -c dist/SHA256SUMS` | усі збірки, Go gate, stdio smoke і SHA-256 пройшли; Claude Desktop та VS Code/Copilot UI-виклики не перевірені | 2026-09-23; спроба прочитати UI через `System Events` зупинилася на macOS `not allowed assistive access` |
 | Go-only cleanup | `go build ./...`; `go vet ./...`; `go test -race -count=1 ./...`; stdio smoke; `go mod tidy -diff` | усі команди пройшли; Go-код, contract fixtures, документація та збірка більше не потребують Python файлів чи інструментів | 2026-09-23; fixtures перенесені в `tests/testdata/rdl/`; старий `server.json` і release workflows вилучені з checkout |
 | RDL analyst workflows | `gofmt -l .`; `go build ./...`; `go vet ./...`; `go test -race ./...`; `go fix -diff ./internal/rdl ./internal/mcpserver`; `golangci-lint run ./...`; `go mod tidy -diff`; error/docs checks; pre-review | пройшли; gofmt та go fix без diff; lint: 0 issues | 18 tools; fixtures, пакетний Textbox patch із per-file write status, semantic diff, вибір Tablix, статична перевірка; PoC на тимчасових копіях трьох звітів №10 пройшов; SSRS render недоступний; `govulncheck` не запускався, залежності не змінювалися; 2026-09-23 |
+| Повторний Go gate і CI | `go build ./...`; `go vet ./...`; `go test -race ./...`; `go mod tidy -diff`; `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/go.yml .github/workflows/release-artifacts.yml` | усі Go-перевірки та actionlint пройшли | macOS arm64, Go 1.27.1; 2026-09-24 |
+| MCPB та registry metadata | `scripts/package-mcpb.sh`; `mcp-publisher validate server.json`; `shasum -a 256 -c dist/SHA256SUMS`; stdio smoke з упакованого launcher | manifest і `server.json` валідні; SHA-256 збігаються; пакет відкрив 18 tools і пройшов читання та редагування тимчасового RDL | MCPB CLI 2.1.2; локальний macOS arm64 пакет, непідписаний; 2026-09-24; клієнтський UI не перевірений |
 
 ## Рішення щодо регулярних виразів
 
@@ -49,10 +51,13 @@
 
 ## Контрольна точка
 
-- Клієнтська перевірка 4.1 залишається відкритою. Повторні 6 крос-компіляцій, Go gate, stdio smoke та перевірка SHA-256 пройшли; Claude Desktop та VS Code/Copilot не підтверджені. macOS заблокувала читання UI через `System Events` (`not allowed assistive access`).
-- Підготовлені ізольовані приклади: `dist/claude-desktop-snippet.json`, `dist/vscode-mcp-snippet.json`, окремі копії `dist/claude-smoke.rdl` і `dist/vscode-smoke.rdl`. Приклади слід додавати до чинних конфігурацій, не замінюючи їх.
-- Go runtime cleanup виконано за прямим рішенням користувача й пройдено Go-only gate. Публічний MCP Registry запис не змінювався. Для Go-розповсюдження треба створити MCPB manifest, пакет і новий `server.json` у завданні 4.2.
-- Наступна дія: підтвердити виклики в Claude Desktop та VS Code/Copilot; окремо підготувати MCPB/registry metadata і Go CI/release workflow.
+- Повторно зібрано шість бінарників для darwin/linux/windows × amd64/arm64. Поточний каталог містить 18 tools: 15 migration-baseline tools і три додані analyst tools; локальний MCPB smoke побачив усі 18 і виконав читання та редагування копії RDL.
+- Claude Desktop і VS Code test snippets у `dist/` тепер вказують на ARM64 бінарник цього checkout.
+- `mcpb/manifest.json`, локальний непідписаний `dist/rdl-mcp.mcpb` і `server.json` пройшли перевірку; `server.json` містить SHA-256 цього пакета. Пакет і бінарники в `dist/` ігноруються Git.
+- Клієнтська перевірка 4.1 і встановлення MCPB у підтримуваному клієнті для 4.2 залишаються відкритими: виклики в Claude Desktop та VS Code/Copilot UI не підтверджені. Попередній запуск UI automation зупинився на macOS `not allowed assistive access`.
+- README тепер позначає `uvx rdl-mcp` як старий Python спосіб. Додані Go CI та tag workflow готують Go/MCPB/SHA-256/`server.json` як артефакт GitHub Actions; workflow не створює GitHub Release і не публікує registry запис.
+- Новий Go release і MCP Registry запис не публікувалися. Завдання 4.5 потребує окремого рішення користувача.
+- Наступна дія: перевірити пакет у Claude Desktop і VS Code/Copilot, після чого закрити 4.1/4.2; публікацію розглядати окремо.
 - Прийняті розбіжності: формулювання XML parse error, припинення сеансу після невалідного JSON, форма помилки відсутнього `filepath`, форматування JSON/XML і SDK metadata. Повний синтаксичний паритет Python `re` лишається непідтвердженим ризиком.
 
 ## Відкат

@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eu
+
+script_dir=$(CDPATH= cd "$(dirname "$0")" && pwd)
+os=$(uname -s)
+arch=$(uname -m)
+
+case "$os/$arch" in
+  Darwin/arm64) binary=rdl-mcp_darwin_arm64 ;;
+  Darwin/x86_64) binary=rdl-mcp_darwin_amd64 ;;
+  Linux/x86_64) binary=rdl-mcp_linux_amd64 ;;
+  Linux/aarch64|Linux/arm64) binary=rdl-mcp_linux_arm64 ;;
+  *)
+    printf 'RDL MCP не підтримує платформу %s/%s\n' "$os" "$arch" >&2
+    exit 1
+    ;;
+esac
+
+exec "$script_dir/$binary" "$@"

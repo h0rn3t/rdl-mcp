@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.bethmaloney/rdl-mcp",
+  "title": "RDL MCP",
+  "description": "Читання, перевірка й редагування звітів SSRS у форматі RDL.",
+  "repository": {
+    "url": "https://github.com/h0rn3t/rdl-mcp",
+    "source": "github"
+  },
+  "version": "0.2.0",
+  "packages": [
+    {
+      "registryType": "mcpb",
+      "identifier": "https://github.com/h0rn3t/rdl-mcp/releases/download/v0.2.0/rdl-mcp.mcpb",
+      "fileSha256": "61143ff793e01171c352c14c9de34db0f60e15675cebbd7830714a951a8d2cd5",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

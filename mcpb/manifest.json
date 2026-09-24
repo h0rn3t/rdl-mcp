@@ -1,0 +1,40 @@
+{
+  "manifest_version": "0.3",
+  "name": "rdl-mcp",
+  "display_name": "RDL MCP",
+  "version": "0.2.0",
+  "description": "Читання, перевірка й редагування звітів SSRS у форматі RDL.",
+  "author": {
+    "name": "Команда RDL MCP",
+    "url": "https://github.com/h0rn3t/rdl-mcp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/h0rn3t/rdl-mcp.git"
+  },
+  "server": {
+    "type": "binary",
+    "entry_point": "server/rdl-mcp",
+    "mcp_config": {
+      "command": "${__dirname}/server/rdl-mcp",
+      "args": [],
+      "platform_overrides": {
+        "win32": {
+          "command": "powershell.exe",
+          "args": [
+            "-NoLogo",
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            "${__dirname}/server/rdl-mcp.ps1"
+          ]
+        }
+      }
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "linux", "win32"]
+  }
+}
